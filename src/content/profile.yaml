@@ -1,0 +1,35 @@
+name: "Swapon Islam"
+fullName: "MD Swapon Islam"
+headline: "Building Experiences Beyond the Screen."
+intro: "XR Developer | Unity & Unreal Engine | Spatial Computing | AI Integration | Game Development"
+email: "tm.swapon@gmail.com"
+location: "Dhaka, Bangladesh"
+githubUsername: "AlphaNoob07"
+links:
+  github: "https://github.com/AlphaNoob07"
+  linkedin: "https://www.linkedin.com/in/swapon-islam-57a55111b/"
+about:
+  - "I am an AR/VR and Game Developer based in Dhaka, Bangladesh, building interactive 3D, spatial computing, and game experiences across Unity, Unreal Engine, and mobile/headset XR platforms since January 2015."
+  - "My work spans cross-platform hypercasual and hybrid-casual games, clinical AR anatomy and surgical training simulations developed with medical professionals, and real-time computer vision and spatial applications for AR glasses and Android XR."
+education:
+  - degree: "BA (Hons) in English"
+    institution: "European University of Bangladesh"
+    period: "2020–2023"
+    location: "Dhaka, Bangladesh"
+  - degree: "HSC"
+    institution: "Pollabi Degree College"
+    period: "2017–2018"
+    location: "Dhaka, Bangladesh"
+expertise:
+  - "Management Skills"
+  - "Creativity"
+  - "Game Design"
+  - "Critical Thinking"
+  - "Leadership"
+curatedRepos:
+  - "AR-Shooter"
+  - "Example-AR-Image-Tracking"
+i18n:
+  defaultLocale: "en"
+  locales:
+    - "en"

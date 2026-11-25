@@ -1,0 +1,67 @@
+---
+import { render } from 'astro:content';
+import CaseStudy from '../../layouts/CaseStudy.astro';
+import { getProjects, type ProjectEntry } from '../../lib/content';
+
+export async function getStaticPaths() {
+  const projects = await getProjects();
+
+  return projects.map((project, index) => {
+    const prevProject = index > 0 ? projects[index - 1] : null;
+    const nextProject = index < projects.length - 1 ? projects[index + 1] : null;
+
+    const categorySet = new Set(project.data.categories);
+    const techSet = new Set(project.data.tech);
+
+    const relatedProjects = projects
+      .filter((candidate) => candidate.id !== project.id)
+      .map((candidate) => {
+        const catMatches = candidate.data.categories.filter((c) =>
+          categorySet.has(c)
+        ).length;
+        const techMatches = candidate.data.tech.filter((t) =>
+          techSet.has(t)
+        ).length;
+        return {
+          candidate,
+          score: catMatches * 2 + techMatches,
+        };
+      })
+      .filter((item) => item.score > 0)
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3)
+      .map((item) => item.candidate);
+
+    return {
+      params: { slug: project.id },
+      props: {
+        project,
+        prevProject,
+        nextProject,
+        relatedProjects,
+      },
+    };
+  });
+}
+
+interface Props {
+  project: ProjectEntry;
+  prevProject: ProjectEntry | null;
+  nextProject: ProjectEntry | null;
+  relatedProjects: ProjectEntry[];
+}
+
+const { project, prevProject, nextProject, relatedProjects } = Astro.props;
+const { Content } = await render(project);
+const hasBody = Boolean(project.body && project.body.trim().length > 0);
+---
+
+<CaseStudy
+  project={project}
+  prevProject={prevProject}
+  nextProject={nextProject}
+  relatedProjects={relatedProjects}
+  hasBody={hasBody}
+>
+  <Content />
+</CaseStudy>

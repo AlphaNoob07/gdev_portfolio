@@ -1,0 +1,554 @@
+---
+import GlassPanel from './GlassPanel.astro';
+import AvailabilityBadge from './AvailabilityBadge.astro';
+import type { AvailabilityData, ProfileData } from '../lib/content';
+
+interface Props {
+  profile: ProfileData;
+  availability: AvailabilityData;
+}
+
+const { profile, availability } = Astro.props;
+---
+
+<section id="contact" class="section reveal" data-contact-section>
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">Contact</span>
+      <h2 class="section-title">Let&apos;s Connect</h2>
+      <p class="section-subtitle">
+        Have an XR, simulation, computer vision, or game development project in mind? Send a message directly below.
+      </p>
+    </div>
+
+    <div class="contact-grid">
+      <GlassPanel variant="panel" padding="lg" interactive class="contact-info-pane">
+        <div class="contact-info-stack">
+          <AvailabilityBadge availability={availability} />
+
+          <div class="contact-block">
+            <span class="contact-label">Direct Email</span>
+            <a class="contact-email" href={`mailto:${profile.email}`}>
+              {profile.email}
+            </a>
+          </div>
+
+          <div class="contact-block">
+            <span class="contact-label">Location</span>
+            <p class="contact-value">{profile.location}</p>
+          </div>
+
+          <div class="contact-block">
+            <span class="contact-label">Profiles &amp; Resume</span>
+            <div class="contact-links">
+              <a
+                class="chip contact-link"
+                href={profile.links.github}
+                target="_blank"
+                rel="noopener"
+              >
+                GitHub
+              </a>
+              <a
+                class="chip contact-link"
+                href={profile.links.linkedin}
+                target="_blank"
+                rel="noopener"
+              >
+                LinkedIn
+              </a>
+              <a
+                class="chip contact-link"
+                href="/resume/Resume-Of-MD-Swapon-Islam.pdf"
+                target="_blank"
+                rel="noopener"
+                data-umami-event="cv_download"
+              >
+                Resume (PDF)
+              </a>
+            </div>
+          </div>
+        </div>
+      </GlassPanel>
+
+      <GlassPanel variant="panel" padding="lg" class="contact-form-pane">
+        <form class="contact-form" data-contact-form novalidate>
+          <div class="honeypot-field" aria-hidden="true">
+            <label for="contact-website">Website</label>
+            <input
+              id="contact-website"
+              name="website"
+              type="text"
+              tabindex="-1"
+              autocomplete="off"
+            />
+          </div>
+
+          <input type="hidden" name="renderedAt" value="" data-rendered-at />
+          <input type="hidden" name="idempotencyKey" value="" data-idempotency-key />
+
+          <div class="form-row">
+            <div class="field">
+              <label for="contact-name">Name <span aria-hidden="true">*</span></label>
+              <input
+                id="contact-name"
+                name="name"
+                type="text"
+                required
+                minlength="2"
+                maxlength="120"
+                autocomplete="name"
+                placeholder="Your name"
+                aria-describedby="error-name"
+              />
+              <span id="error-name" class="field-error" data-error-for="name" />
+            </div>
+
+            <div class="field">
+              <label for="contact-email">Email <span aria-hidden="true">*</span></label>
+              <input
+                id="contact-email"
+                name="email"
+                type="email"
+                required
+                maxlength="160"
+                autocomplete="email"
+                placeholder="you@example.com"
+                aria-describedby="error-email"
+              />
+              <span id="error-email" class="field-error" data-error-for="email" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="contact-subject">Subject</label>
+            <input
+              id="contact-subject"
+              name="subject"
+              type="text"
+              maxlength="160"
+              placeholder="Project inquiry, XR prototype, collaboration..."
+              aria-describedby="error-subject"
+            />
+            <span id="error-subject" class="field-error" data-error-for="subject" />
+          </div>
+
+          <div class="field">
+            <div class="field-label-row">
+              <label for="contact-message">Message <span aria-hidden="true">*</span></label>
+              <span class="char-count" data-char-count>0 / 2000</span>
+            </div>
+            <textarea
+              id="contact-message"
+              name="message"
+              rows="5"
+              required
+              minlength="10"
+              maxlength="2000"
+              placeholder="Tell me about your goals, timeline, or platform targets..."
+              aria-describedby="error-message"
+            ></textarea>
+            <span id="error-message" class="field-error" data-error-for="message" />
+          </div>
+
+          <div class="form-actions">
+            <button type="submit" class="btn btn-primary submit-btn" data-submit-btn>
+              <span class="spinner" aria-hidden="true" hidden data-submit-spinner />
+              <span data-submit-label>Send Message</span>
+            </button>
+          </div>
+
+          <div
+            class="form-status"
+            role="status"
+            aria-live="polite"
+            hidden
+            data-form-status
+          />
+        </form>
+      </GlassPanel>
+    </div>
+  </div>
+</section>
+
+<style>
+  .contact-grid {
+    display: grid;
+    grid-template-columns: minmax(260px, 0.85fr) minmax(0, 1.35fr);
+    gap: 1.25rem;
+    align-items: stretch;
+  }
+
+  .contact-info-stack {
+    display: grid;
+    gap: 1.35rem;
+    align-content: start;
+  }
+
+  .contact-block {
+    display: grid;
+    gap: 0.35rem;
+  }
+
+  .contact-label {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .contact-email {
+    font-size: var(--text-lg);
+    font-weight: 600;
+    color: var(--accent-blue);
+    text-decoration: none;
+    word-break: break-word;
+  }
+
+  .contact-email:hover {
+    text-decoration: underline;
+  }
+
+  .contact-value {
+    font-size: var(--text-base);
+    color: var(--text-primary);
+  }
+
+  .contact-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    padding-top: 0.2rem;
+  }
+
+  .contact-link {
+    text-decoration: none;
+    color: var(--text-primary);
+  }
+
+  .contact-link:hover {
+    background: var(--glass-pill-hover);
+    border-color: var(--glass-border-strong);
+  }
+
+  .contact-form {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .honeypot-field {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+  }
+
+  .form-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .field {
+    display: grid;
+    gap: 0.38rem;
+  }
+
+  .field-label-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .field label {
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .char-count {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+  }
+
+  .field input,
+  .field textarea {
+    width: 100%;
+    padding: 0.72rem 0.95rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--glass-border);
+    background: var(--glass-pill-bg);
+    color: var(--text-primary);
+    font-size: var(--text-sm);
+    transition:
+      border-color var(--duration-fast) ease,
+      background-color var(--duration-fast) ease;
+  }
+
+  .field input:focus,
+  .field textarea:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+    background: var(--glass-pill-hover);
+  }
+
+  .field input[aria-invalid='true'],
+  .field textarea[aria-invalid='true'] {
+    border-color: #f87171;
+  }
+
+  .field-error {
+    min-height: 1rem;
+    font-size: var(--text-xs);
+    color: #f87171;
+  }
+
+  .form-actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .submit-btn:disabled {
+    opacity: 0.7;
+    cursor: progress;
+  }
+
+  .spinner {
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-top-color: #ffffff;
+    border-radius: 9999px;
+    animation: spin 0.7s linear infinite;
+  }
+
+  @keyframes spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .form-status {
+    padding: 0.85rem 1rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--glass-border);
+    background: var(--glass-pill-bg);
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+  }
+
+  .form-status[data-tone='success'] {
+    border-color: rgba(52, 211, 153, 0.45);
+    background: rgba(52, 211, 153, 0.1);
+  }
+
+  .form-status[data-tone='error'] {
+    border-color: rgba(248, 113, 113, 0.45);
+    background: rgba(248, 113, 113, 0.1);
+  }
+
+  @media (max-width: 820px) {
+    .contact-grid,
+    .form-row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  let cleanupContact: (() => void) | null = null;
+
+  function createIdempotencyKey(): string {
+    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+      return crypto.randomUUID();
+    }
+    return `${Date.now()}-${Math.random().toString(36).slice(2, 11)}`;
+  }
+
+  function initContactForm(): void {
+    cleanupContact?.();
+    const section = document.querySelector<HTMLElement>('[data-contact-section]');
+    const form = section?.querySelector<HTMLFormElement>('[data-contact-form]');
+    if (!section || !form) return;
+
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    const renderedAtInput = form.querySelector<HTMLInputElement>('[data-rendered-at]');
+    const idempotencyInput = form.querySelector<HTMLInputElement>('[data-idempotency-key]');
+    const messageEl = form.querySelector<HTMLTextAreaElement>('#contact-message');
+    const charCountEl = form.querySelector<HTMLElement>('[data-char-count]');
+    const submitBtn = form.querySelector<HTMLButtonElement>('[data-submit-btn]');
+    const spinner = form.querySelector<HTMLElement>('[data-submit-spinner]');
+    const submitLabel = form.querySelector<HTMLElement>('[data-submit-label]');
+    const statusEl = form.querySelector<HTMLElement>('[data-form-status]');
+
+    if (renderedAtInput) renderedAtInput.value = String(Date.now());
+    if (idempotencyInput) idempotencyInput.value = createIdempotencyKey();
+
+    const setFieldError = (fieldName: string, message: string) => {
+      const input = form.querySelector<HTMLInputElement | HTMLTextAreaElement>(
+        `[name="${fieldName}"]`
+      );
+      const errEl = form.querySelector<HTMLElement>(`[data-error-for="${fieldName}"]`);
+      if (input) {
+        input.setAttribute('aria-invalid', message ? 'true' : 'false');
+      }
+      if (errEl) {
+        errEl.textContent = message;
+      }
+    };
+
+    const showStatus = (tone: 'success' | 'error' | 'info', text: string, mailtoHref?: string) => {
+      if (!statusEl) return;
+      statusEl.hidden = false;
+      statusEl.dataset.tone = tone;
+      statusEl.textContent = text;
+      if (mailtoHref) {
+        statusEl.append(' ');
+        const link = document.createElement('a');
+        link.href = mailtoHref;
+        link.textContent = 'Open in email client';
+        link.style.color = 'var(--accent-blue)';
+        link.style.fontWeight = '600';
+        statusEl.appendChild(link);
+      }
+    };
+
+    const validateForm = (): boolean => {
+      let valid = true;
+      const nameVal = (form.elements.namedItem('name') as HTMLInputElement)?.value.trim() || '';
+      const emailVal = (form.elements.namedItem('email') as HTMLInputElement)?.value.trim() || '';
+      const subjectVal = (form.elements.namedItem('subject') as HTMLInputElement)?.value.trim() || '';
+      const msgVal = messageEl?.value.trim() || '';
+
+      if (nameVal.length < 2) {
+        setFieldError('name', 'Please enter at least 2 characters.');
+        valid = false;
+      } else {
+        setFieldError('name', '');
+      }
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(emailVal)) {
+        setFieldError('email', 'Please enter a valid email address.');
+        valid = false;
+      } else {
+        setFieldError('email', '');
+      }
+
+      if (subjectVal.length > 160) {
+        setFieldError('subject', 'Subject must be 160 characters or fewer.');
+        valid = false;
+      } else {
+        setFieldError('subject', '');
+      }
+
+      if (msgVal.length < 10) {
+        setFieldError('message', 'Please write at least 10 characters.');
+        valid = false;
+      } else {
+        setFieldError('message', '');
+      }
+
+      return valid;
+    };
+
+    messageEl?.addEventListener(
+      'input',
+      () => {
+        if (charCountEl) {
+          charCountEl.textContent = `${messageEl.value.length} / 2000`;
+        }
+      },
+      { signal }
+    );
+
+    form.addEventListener(
+      'submit',
+      async (event) => {
+        event.preventDefault();
+        if (!validateForm()) {
+          showStatus('error', 'Please fix the highlighted fields before sending.');
+          return;
+        }
+
+        const formData = new FormData(form);
+        const payload = {
+          name: String(formData.get('name') || '').trim(),
+          email: String(formData.get('email') || '').trim(),
+          subject: String(formData.get('subject') || '').trim(),
+          message: String(formData.get('message') || '').trim(),
+          website: String(formData.get('website') || ''),
+          renderedAt: Number(formData.get('renderedAt') || Date.now()),
+          idempotencyKey: String(formData.get('idempotencyKey') || ''),
+        };
+
+        if (submitBtn) submitBtn.disabled = true;
+        if (spinner) spinner.hidden = false;
+        if (submitLabel) submitLabel.textContent = 'Sending...';
+
+        try {
+          const response = await fetch('/api/contact', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload),
+          });
+
+          if (response.status === 404) {
+            const mailto = `mailto:tm.swapon@gmail.com?subject=${encodeURIComponent(
+              payload.subject || `Portfolio Inquiry from ${payload.name}`
+            )}&body=${encodeURIComponent(`${payload.message}\n\nFrom: ${payload.name} (${payload.email})`)}`;
+            showStatus(
+              'info',
+              'Contact API endpoint activates in Milestone M7. You can send directly via email:',
+              mailto
+            );
+            return;
+          }
+
+          const result = (await response.json().catch(() => ({}))) as {
+            ok?: boolean;
+            message?: string;
+            error?: string;
+          };
+
+          if (!response.ok) {
+            showStatus(
+              'error',
+              result.error || 'Could not send message. Please try again.'
+            );
+            return;
+          }
+
+          showStatus(
+            'success',
+            result.message || 'Message sent! Thank you for reaching out.'
+          );
+          form.reset();
+          if (charCountEl) charCountEl.textContent = '0 / 2000';
+          if (renderedAtInput) renderedAtInput.value = String(Date.now());
+          if (idempotencyInput) idempotencyInput.value = createIdempotencyKey();
+        } catch {
+          showStatus(
+            'error',
+            'Network error while sending. Please check your connection or email tm.swapon@gmail.com.'
+          );
+        } finally {
+          if (submitBtn) submitBtn.disabled = false;
+          if (spinner) spinner.hidden = true;
+          if (submitLabel) submitLabel.textContent = 'Send Message';
+        }
+      },
+      { signal }
+    );
+
+    cleanupContact = () => controller.abort();
+  }
+
+  document.addEventListener('astro:page-load', initContactForm);
+</script>

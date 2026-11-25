@@ -1,0 +1,322 @@
+---
+import { Picture } from 'astro:assets';
+import GlassPanel from './GlassPanel.astro';
+import type { ProjectEntry } from '../lib/content';
+import { isImageMetadata, resolveProjectImage } from '../lib/media';
+
+interface Props {
+  project: ProjectEntry;
+  initiallyCollapsed?: boolean;
+}
+
+const { project, initiallyCollapsed = false } = Astro.props;
+const { data } = project;
+const primaryCategory = data.categories[0] ?? 'XR';
+const posterAsset = resolveProjectImage(data.poster);
+const posterIsMetadata = isImageMetadata(posterAsset);
+const posterStringUrl = typeof posterAsset === 'string' ? posterAsset : undefined;
+const caseStudyHref = `/projects/${project.id}`;
+---
+
+<GlassPanel
+  as="article"
+  variant="card"
+  padding="none"
+  interactive
+  id={`project-${project.id}`}
+  class={`project-card${initiallyCollapsed ? ' is-collapsed' : ''}`}
+>
+  <div
+    class="project-card-hook"
+    data-project-card
+    data-project-id={project.id}
+    data-categories={data.categories.join(',')}
+    data-featured={String(data.featured)}
+  >
+    <a
+      href={caseStudyHref}
+      class="project-media"
+      aria-label={`View ${data.title} case study`}
+      data-umami-event="case_study_open"
+      data-umami-event-project={project.id}
+    >
+      {
+        posterIsMetadata ? (
+          <Picture
+            src={posterAsset}
+            formats={['avif', 'webp']}
+            widths={[400, 720]}
+            sizes="(max-width: 768px) 100vw, 380px"
+            loading="lazy"
+            alt={`${data.title} preview`}
+            class="project-poster"
+          />
+        ) : posterStringUrl ? (
+          <img
+            src={posterStringUrl}
+            alt={`${data.title} preview`}
+            loading="lazy"
+            class="project-poster"
+          />
+        ) : (
+          <div class="project-placeholder" data-category={primaryCategory}>
+            <span class="chip">{primaryCategory}</span>
+            <span class="project-placeholder-label">{data.title}</span>
+          </div>
+        )
+      }
+
+      {
+        data.previewVideo && (
+          <video
+            class="project-video"
+            muted
+            loop
+            playsinline
+            preload="none"
+            poster={posterIsMetadata ? posterAsset.src : posterStringUrl}
+            data-preview-video
+          >
+            <source src={data.previewVideo} type="video/mp4" />
+          </video>
+        )
+      }
+    </a>
+
+    <div class="project-body">
+      <div class="project-meta-row">
+        {data.organization && (
+          <span class="project-org">{data.organization}</span>
+        )}
+        {data.confidentiality === 'generic-only' && (
+          <span class="chip project-confidential">Generic overview</span>
+        )}
+      </div>
+
+      <h3 class="project-title">
+        <a
+          href={caseStudyHref}
+          class="project-title-link"
+          data-umami-event="case_study_open"
+          data-umami-event-project={project.id}
+        >
+          {data.title}
+        </a>
+      </h3>
+      <p class="project-summary">{data.summary}</p>
+
+      <div class="project-tags" aria-label="Technologies">
+        {data.tech.map((item) => <span class="chip">{item}</span>)}
+      </div>
+
+      <div class="project-links">
+        <a
+          class="chip project-link project-link--primary"
+          href={caseStudyHref}
+          data-umami-event="case_study_open"
+          data-umami-event-project={project.id}
+        >
+          Case Study &rarr;
+        </a>
+        {
+          data.links?.repo && (
+            <a
+              class="chip project-link"
+              href={data.links.repo}
+              target="_blank"
+              rel="noopener"
+            >
+              GitHub Repo
+            </a>
+          )
+        }
+        {
+          data.links?.live && (
+            <a
+              class="chip project-link"
+              href={data.links.live}
+              target="_blank"
+              rel="noopener"
+            >
+              Live Demo
+            </a>
+          )
+        }
+        {
+          data.links?.video && (
+            <a
+              class="chip project-link"
+              href={data.links.video}
+              target="_blank"
+              rel="noopener"
+            >
+              Video
+            </a>
+          )
+        }
+      </div>
+    </div>
+  </div>
+</GlassPanel>
+
+<style>
+  :global(.project-card) {
+    display: flex;
+    flex-direction: column;
+    transition:
+      border-color var(--duration-fast) var(--ease-spring),
+      transform var(--duration-base) var(--ease-spring),
+      box-shadow var(--duration-base) var(--ease-spring);
+  }
+
+  :global(.project-card[hidden]),
+  :global(.project-card.is-collapsed) {
+    display: none;
+  }
+
+  :global(.project-card.is-highlighted) {
+    border-color: var(--accent-blue);
+    box-shadow:
+      0 0 0 2px rgba(96, 165, 250, 0.45),
+      var(--glass-shadow);
+  }
+
+  .project-card-hook {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    height: 100%;
+  }
+
+  .project-media {
+    position: relative;
+    display: block;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    text-decoration: none;
+    border-bottom: 1px solid var(--glass-border);
+    background: linear-gradient(
+      135deg,
+      rgba(59, 130, 246, 0.14) 0%,
+      rgba(139, 92, 246, 0.12) 100%
+    );
+  }
+
+  :global(.project-media picture),
+  .project-poster,
+  .project-video {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .project-video {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    transition: opacity var(--duration-base) ease;
+  }
+
+  .project-card-hook:hover .project-video {
+    opacity: 1;
+  }
+
+  .project-placeholder {
+    width: 100%;
+    height: 100%;
+    padding: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+    background:
+      radial-gradient(circle at 82% 20%, rgba(96, 165, 250, 0.22), transparent 55%),
+      radial-gradient(circle at 18% 85%, rgba(167, 139, 250, 0.18), transparent 55%);
+  }
+
+  .project-placeholder-label {
+    font-size: var(--text-lg);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+    opacity: 0.9;
+  }
+
+  .project-body {
+    padding: clamp(1.1rem, 2.2vw, 1.45rem);
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem;
+  }
+
+  .project-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    min-height: 1.25rem;
+  }
+
+  .project-org {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--accent-blue);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  .project-confidential {
+    font-size: 0.72rem;
+  }
+
+  .project-title {
+    font-size: var(--text-lg);
+    font-weight: 650;
+    letter-spacing: -0.015em;
+  }
+
+  .project-title-link {
+    text-decoration: none;
+  }
+
+  .project-title-link:hover {
+    color: var(--accent-blue);
+  }
+
+  .project-summary {
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    line-height: 1.55;
+  }
+
+  .project-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: auto;
+    padding-top: 0.35rem;
+  }
+
+  .project-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid var(--glass-border);
+  }
+
+  .project-link {
+    text-decoration: none;
+    color: var(--text-primary);
+  }
+
+  .project-link--primary {
+    color: var(--accent-blue);
+    font-weight: 600;
+  }
+
+  .project-link:hover {
+    background: var(--glass-pill-hover);
+    border-color: var(--glass-border-strong);
+  }
+</style>

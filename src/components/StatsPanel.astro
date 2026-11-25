@@ -1,0 +1,87 @@
+<div class="stats-widget glass-pill" data-stats-widget aria-live="polite">
+  <span class="stats-dot" aria-hidden="true"></span>
+  <span class="stats-text" data-stats-text>Loading visitor stats...</span>
+</div>
+
+<style>
+  .stats-widget {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.42rem 0.9rem;
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+  }
+
+  .stats-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 9999px;
+    background: var(--text-muted);
+  }
+
+  .stats-widget[data-state='ok'] .stats-dot {
+    background: #34d399;
+    box-shadow: 0 0 8px rgba(52, 211, 153, 0.7);
+  }
+
+  .stats-widget[data-state='unavailable'] .stats-dot {
+    background: var(--text-muted);
+  }
+</style>
+
+<script>
+  interface StatsOk {
+    ok: true;
+    launchDate: string;
+    totals: {
+      visits: number;
+      uniques: number;
+      pageviews: number;
+    };
+    activeNow: number;
+  }
+
+  interface StatsErr {
+    ok: false;
+    error: string;
+  }
+
+  let cleanupStats: (() => void) | null = null;
+
+  function initStatsPanel(): void {
+    cleanupStats?.();
+    const widget = document.querySelector<HTMLElement>('[data-stats-widget]');
+    const textEl = widget?.querySelector<HTMLElement>('[data-stats-text]');
+    if (!widget || !textEl) return;
+
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    const fmt = new Intl.NumberFormat('en-US');
+
+    fetch('/api/stats', { signal })
+      .then((res) => res.json() as Promise<StatsOk | StatsErr>)
+      .then((data) => {
+        if (signal.aborted) return;
+        if (!data.ok) {
+          widget.dataset.state = 'unavailable';
+          textEl.textContent = 'Stats unavailable';
+          return;
+        }
+        widget.dataset.state = 'ok';
+        const { visits, uniques, pageviews } = data.totals;
+        textEl.textContent = `${fmt.format(visits)} visits · ${fmt.format(uniques)} unique · ${fmt.format(pageviews)} views (since ${data.launchDate}) · ${fmt.format(data.activeNow)} active now`;
+      })
+      .catch(() => {
+        if (signal.aborted) return;
+        widget.dataset.state = 'unavailable';
+        textEl.textContent = 'Stats unavailable';
+      });
+
+    cleanupStats = () => controller.abort();
+  }
+
+  document.addEventListener('astro:page-load', initStatsPanel);
+</script>

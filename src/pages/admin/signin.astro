@@ -1,0 +1,113 @@
+---
+import Base from '../../layouts/Base.astro';
+import GlassPanel from '../../components/GlassPanel.astro';
+import { getAdminSession, isAuthConfigured } from '../../lib/auth';
+
+export const prerender = false;
+
+const session = getAdminSession(Astro.cookies);
+if (session) {
+  return Astro.redirect('/admin', 302);
+}
+
+const errorParam = Astro.url.searchParams.get('error');
+const configured = isAuthConfigured();
+
+const ERROR_MESSAGES: Record<string, string> = {
+  forbidden:
+    'Access denied. Only the configured GitHub account (AlphaNoob07) is permitted to access the admin dashboard.',
+  not_configured:
+    'GitHub OAuth admin environment variables (AUTH_SECRET, AUTH_GITHUB_ID, AUTH_GITHUB_SECRET, ADMIN_GITHUB_USER_ID) are not configured yet.',
+  oauth_failed:
+    'GitHub sign-in could not be completed. Please try again.',
+};
+
+const errorText =
+  (errorParam && ERROR_MESSAGES[errorParam]) ||
+  (!configured ? ERROR_MESSAGES.not_configured : '');
+---
+
+<Base
+  title="Admin Sign In — Swapon Islam"
+  description="Protected portfolio admin authentication."
+  noindex={true}
+>
+  <section class="section signin-section">
+    <div class="container signin-container">
+      <GlassPanel variant="panel" padding="lg" class="signin-card">
+        <span class="eyebrow">Protected Area</span>
+        <h1 class="signin-title">Admin Dashboard</h1>
+        <p class="signin-copy">
+          Sign in with GitHub. Access is restricted strictly to the owner account.
+        </p>
+
+        {
+          errorText && (
+            <div class="signin-alert" role="alert">
+              {errorText}
+            </div>
+          )
+        }
+
+        <div class="signin-actions">
+          <a
+            href="/api/auth/signin"
+            class:list={['btn btn-primary', !configured && 'is-disabled']}
+            aria-disabled={!configured ? 'true' : undefined}
+          >
+            Sign in with GitHub
+          </a>
+          <a href="/" class="btn">Back to Portfolio</a>
+        </div>
+      </GlassPanel>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .signin-section {
+    min-height: 70vh;
+    display: grid;
+    place-items: center;
+  }
+
+  .signin-container {
+    width: min(520px, calc(100% - 2rem));
+  }
+
+  :global(.signin-card) {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .signin-title {
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+
+  .signin-copy {
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+  }
+
+  .signin-alert {
+    padding: 0.85rem 1rem;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(248, 113, 113, 0.45);
+    background: rgba(248, 113, 113, 0.12);
+    color: var(--text-primary);
+    font-size: var(--text-sm);
+  }
+
+  .signin-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding-top: 0.35rem;
+  }
+
+  .is-disabled {
+    opacity: 0.6;
+  }
+</style>

@@ -1,0 +1,347 @@
+---
+import { Image } from 'astro:assets';
+import GlassPanel from './GlassPanel.astro';
+import AvailabilityBadge from './AvailabilityBadge.astro';
+import profilePic from '../assets/profile_pic.png';
+import type { AvailabilityData, ProfileData } from '../lib/content';
+
+interface Props {
+  profile: ProfileData;
+  availability: AvailabilityData;
+}
+
+const { profile, availability } = Astro.props;
+
+const focusDisciplines = [
+  'Spatial Computing',
+  'Unity & Unreal',
+  'Medical AR/VR',
+  'Computer Vision',
+];
+---
+
+<section id="home" class="section hero-section">
+  <div class="container">
+    <div class="hero-stage" data-hero-stage>
+      <GlassPanel
+        variant="panel"
+        padding="lg"
+        interactive
+        class="hero-main-pane"
+      >
+        <div class="hero-pane-inner" data-parallax-pane="1">
+          <div class="hero-top-row">
+            <span class="eyebrow">{profile.name}</span>
+            <AvailabilityBadge availability={availability} compact />
+          </div>
+
+          <h1 class="hero-title">{profile.headline}</h1>
+          <p class="hero-intro">{profile.intro}</p>
+
+          <div class="hero-actions">
+            <a href="#projects" class="btn btn-primary">Explore Projects</a>
+            <a href="#contact" class="btn">Contact Me</a>
+            <a
+              href="/resume/Resume-Of-MD-Swapon-Islam.pdf"
+              class="btn"
+              target="_blank"
+              rel="noopener"
+              data-umami-event="cv_download"
+            >
+              Download CV
+            </a>
+          </div>
+
+          <div class="hero-social" aria-label="External profiles">
+            <a
+              class="chip hero-social-link"
+              href={profile.links.github}
+              target="_blank"
+              rel="noopener"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.53 1.032 1.53 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2Z" />
+              </svg>
+              <span>GitHub</span>
+            </a>
+            <a
+              class="chip hero-social-link"
+              href={profile.links.linkedin}
+              target="_blank"
+              rel="noopener"
+            >
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.88 8.56a1.68 1.68 0 0 0 1.68-1.68c0-.93-.75-1.69-1.68-1.69a1.69 1.69 0 0 0-1.69 1.69c0 .93.76 1.68 1.69 1.68m1.39 9.94v-8.37H5.5v8.37h2.77Z" />
+              </svg>
+              <span>LinkedIn</span>
+            </a>
+          </div>
+        </div>
+      </GlassPanel>
+
+      <div class="hero-side-stack">
+        <GlassPanel
+          variant="card"
+          padding="md"
+          interactive
+          class="hero-portrait-pane"
+        >
+          <div class="hero-portrait-inner" data-parallax-pane="1.6">
+            <div class="hero-avatar-ring">
+              <Image
+                src={profilePic}
+                alt={profile.fullName}
+                width={320}
+                height={320}
+                loading="eager"
+                fetchpriority="high"
+                class="hero-avatar"
+              />
+            </div>
+            <div class="hero-identity">
+              <p class="hero-identity-name">{profile.fullName}</p>
+              <p class="hero-identity-loc">{profile.location}</p>
+            </div>
+          </div>
+        </GlassPanel>
+
+        <GlassPanel
+          variant="card"
+          padding="md"
+          interactive
+          class="hero-meta-pane"
+        >
+          <div class="hero-meta-inner" data-parallax-pane="2">
+            <span class="hero-meta-label">Core Focus</span>
+            <div class="hero-meta-chips">
+              {focusDisciplines.map((item) => <span class="chip">{item}</span>)}
+            </div>
+          </div>
+        </GlassPanel>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .hero-section {
+    padding-top: clamp(1.5rem, 3.5vw, 3rem);
+    padding-bottom: clamp(2.5rem, 5vw, 4.5rem);
+  }
+
+  .hero-stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1.5fr) minmax(260px, 0.85fr);
+    gap: clamp(1.1rem, 2.5vw, 1.6rem);
+    align-items: stretch;
+    perspective: 1200px;
+  }
+
+  .hero-pane-inner,
+  .hero-portrait-inner,
+  .hero-meta-inner {
+    transition: transform var(--duration-fast) var(--ease-spring);
+    transform-style: preserve-3d;
+    will-change: transform;
+  }
+
+  .hero-main-pane {
+    display: flex;
+    align-items: center;
+  }
+
+  .hero-pane-inner {
+    display: grid;
+    gap: 1.15rem;
+    width: 100%;
+  }
+
+  .hero-top-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem 1rem;
+  }
+
+  .hero-title {
+    font-size: var(--text-display);
+    font-weight: 700;
+    letter-spacing: -0.035em;
+    line-height: 1.04;
+  }
+
+  .hero-intro {
+    font-size: var(--text-lg);
+    color: var(--text-secondary);
+    max-width: 54ch;
+  }
+
+  .hero-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding-top: 0.25rem;
+  }
+
+  .hero-social {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    padding-top: 0.25rem;
+  }
+
+  .hero-social-link {
+    text-decoration: none;
+    transition:
+      background-color var(--duration-fast) ease,
+      border-color var(--duration-fast) ease,
+      color var(--duration-fast) ease;
+  }
+
+  .hero-social-link:hover {
+    color: var(--text-primary);
+    background: var(--glass-pill-hover);
+    border-color: var(--glass-border-strong);
+  }
+
+  .hero-side-stack {
+    display: grid;
+    gap: clamp(1rem, 2vw, 1.35rem);
+    align-content: space-between;
+  }
+
+  .hero-portrait-inner {
+    display: grid;
+    justify-items: center;
+    text-align: center;
+    gap: 0.95rem;
+  }
+
+  .hero-avatar-ring {
+    padding: 4px;
+    border-radius: 9999px;
+    background: var(--accent-gradient);
+    box-shadow: 0 14px 32px -12px rgba(59, 130, 246, 0.55);
+  }
+
+  .hero-avatar {
+    width: 156px;
+    height: 156px;
+    border-radius: 9999px;
+    object-fit: cover;
+    background: var(--bg-base);
+  }
+
+  .hero-identity {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .hero-identity-name {
+    font-size: var(--text-base);
+    font-weight: 650;
+  }
+
+  .hero-identity-loc {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+
+  .hero-meta-inner {
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  .hero-meta-label {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--accent-blue);
+  }
+
+  .hero-meta-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  @media (max-width: 900px) {
+    .hero-stage {
+      grid-template-columns: 1fr;
+    }
+
+    .hero-side-stack {
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .hero-pane-inner,
+    .hero-portrait-inner,
+    .hero-meta-inner {
+      transition: none;
+      transform: none !important;
+    }
+  }
+</style>
+
+<script>
+  let cleanupHeroParallax: (() => void) | null = null;
+
+  function initHeroParallax(): void {
+    cleanupHeroParallax?.();
+
+    const prefersReducedMotion = window.matchMedia(
+      '(prefers-reduced-motion: reduce)'
+    ).matches;
+    const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+    if (prefersReducedMotion || !canHover) return;
+
+    const stage = document.querySelector<HTMLElement>('[data-hero-stage]');
+    if (!stage) return;
+
+    const panes = Array.from(
+      stage.querySelectorAll<HTMLElement>('[data-parallax-pane]')
+    );
+    if (panes.length === 0) return;
+
+    const controller = new AbortController();
+    const { signal } = controller;
+    const maxTiltDeg = 3.5;
+
+    stage.addEventListener(
+      'pointermove',
+      (event) => {
+        const rect = stage.getBoundingClientRect();
+        const nx = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+        const ny = ((event.clientY - rect.top) / rect.height) * 2 - 1;
+
+        panes.forEach((pane) => {
+          const depth = Number(pane.dataset.parallaxPane || '1');
+          const rotY = nx * maxTiltDeg;
+          const rotX = -ny * maxTiltDeg;
+          const tx = nx * 4 * depth;
+          const ty = ny * 4 * depth;
+          pane.style.transform = `rotateX(${rotX.toFixed(2)}deg) rotateY(${rotY.toFixed(2)}deg) translate3d(${tx.toFixed(1)}px, ${ty.toFixed(1)}px, 0)`;
+        });
+      },
+      { signal }
+    );
+
+    stage.addEventListener(
+      'pointerleave',
+      () => {
+        panes.forEach((pane) => {
+          pane.style.transform = 'rotateX(0deg) rotateY(0deg) translate3d(0, 0, 0)';
+        });
+      },
+      { signal }
+    );
+
+    cleanupHeroParallax = () => controller.abort();
+  }
+
+  document.addEventListener('astro:page-load', initHeroParallax);
+</script>

@@ -1,0 +1,193 @@
+---
+import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.astro';
+import AboutSection from '../components/AboutSection.astro';
+import SkillUniverse from '../components/SkillUniverse.astro';
+import Timeline from '../components/Timeline.astro';
+import ProjectFilters from '../components/ProjectFilters.astro';
+import XRShowcase from '../components/XRShowcase.astro';
+import GitHubShowcase from '../components/GitHubShowcase.astro';
+import ContactForm from '../components/ContactForm.astro';
+import GlassPanel from '../components/GlassPanel.astro';
+import {
+  buildSkillConstellation,
+  getAvailability,
+  getBlogPosts,
+  getCertifications,
+  getExperience,
+  getProfile,
+  getProjects,
+  getSkills,
+  getTestimonials,
+  validateContentIntegrity,
+} from '../lib/content';
+
+const [
+  profile,
+  availability,
+  skills,
+  experience,
+  projects,
+  blogPosts,
+  testimonials,
+  certifications,
+] = await Promise.all([
+  getProfile(),
+  getAvailability(),
+  getSkills(),
+  getExperience(),
+  getProjects(),
+  getBlogPosts(),
+  getTestimonials(),
+  getCertifications(),
+]);
+
+validateContentIntegrity(experience, skills, projects);
+const constellation = buildSkillConstellation(skills, projects);
+const projectTitles = new Map(projects.map((p) => [p.id, p.data.title]));
+---
+
+<Base>
+  <Hero profile={profile} availability={availability} />
+
+  <AboutSection profile={profile} />
+
+  <SkillUniverse
+    skills={skills}
+    constellation={constellation}
+    projectTitles={projectTitles}
+  />
+
+  <Timeline entries={experience} projectTitles={projectTitles} />
+
+  <ProjectFilters projects={projects} />
+
+  <XRShowcase projectTitles={projectTitles} enableModelPreview={false} />
+
+  <GitHubShowcase profile={profile} />
+
+  {
+    (testimonials.length > 0 || certifications.length > 0) && (
+      <section id="milestones" class="section reveal">
+        <div class="container">
+          <div class="section-head">
+            <span class="eyebrow">Recognition</span>
+            <h2 class="section-title">Recommendations &amp; Certifications</h2>
+          </div>
+
+          <div class="milestones-grid">
+            {testimonials.map((item) => (
+              <GlassPanel as="article" variant="card" padding="md" interactive>
+                <blockquote class="rec-quote">
+                  &ldquo;{item.data.quote}&rdquo;
+                </blockquote>
+                <p class="rec-author">
+                  <strong>{item.data.author}</strong>
+                  {(item.data.role || item.data.company) && (
+                    <span>
+                      {' '}
+                      · {[item.data.role, item.data.company].filter(Boolean).join(', ')}
+                    </span>
+                  )}
+                </p>
+              </GlassPanel>
+            ))}
+
+            {certifications.map((cert) => (
+              <GlassPanel as="article" variant="card" padding="md" interactive>
+                <span class="chip">{cert.data.authority}</span>
+                <h3 class="cert-title">{cert.data.name}</h3>
+                {cert.data.issuedAt && (
+                  <p class="cert-meta">Issued {cert.data.issuedAt}</p>
+                )}
+                {cert.data.url && (
+                  <a
+                    class="cert-link"
+                    href={cert.data.url}
+                    target="_blank"
+                    rel="noopener"
+                  >
+                    Verify Credential
+                  </a>
+                )}
+              </GlassPanel>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    blogPosts.length > 0 && (
+      <section id="blog" class="section reveal">
+        <div class="container">
+          <div class="section-head">
+            <span class="eyebrow">Writing</span>
+            <h2 class="section-title">Latest Articles</h2>
+          </div>
+          <div class="milestones-grid">
+            {blogPosts.slice(0, 3).map((post) => (
+              <GlassPanel as="article" variant="card" padding="md" interactive>
+                <h3 class="cert-title">{post.data.title}</h3>
+                <p class="cert-meta">{post.data.description}</p>
+              </GlassPanel>
+            ))}
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  <ContactForm profile={profile} availability={availability} />
+</Base>
+
+<style>
+  .milestones-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.15rem;
+  }
+
+  .rec-quote {
+    margin: 0 0 0.85rem;
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    line-height: 1.65;
+  }
+
+  .rec-author {
+    font-size: var(--text-sm);
+    color: var(--text-primary);
+  }
+
+  .rec-author span {
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+
+  .cert-title {
+    font-size: var(--text-lg);
+    font-weight: 650;
+    margin-top: 0.65rem;
+  }
+
+  .cert-meta {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    margin-top: 0.35rem;
+  }
+
+  .cert-link {
+    display: inline-block;
+    margin-top: 0.65rem;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--accent-blue);
+    text-decoration: none;
+  }
+
+  .cert-link:hover {
+    text-decoration: underline;
+  }
+</style>

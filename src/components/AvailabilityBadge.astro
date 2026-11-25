@@ -1,0 +1,105 @@
+---
+import type { AvailabilityData } from '../lib/content';
+
+interface Props {
+  availability: AvailabilityData;
+  compact?: boolean;
+}
+
+const { availability, compact = false } = Astro.props;
+
+const STATUS_LABELS: Record<Exclude<AvailabilityData['status'], 'hidden'>, string> = {
+  available: 'Available for new work',
+  limited: 'Limited availability',
+  booked: 'Currently booked',
+};
+
+const ENGAGEMENT_LABELS: Record<
+  AvailabilityData['engagements'][number],
+  string
+> = {
+  freelance: 'Freelance',
+  contract: 'Contract',
+  consulting: 'Consulting',
+  'xr-collaboration': 'XR Collaboration',
+  'full-time': 'Full-Time',
+};
+---
+
+{
+  availability.status !== 'hidden' && (
+    <div
+      class:list={[
+        'availability-wrap',
+        compact && 'availability-wrap--compact',
+      ]}
+      data-status={availability.status}
+    >
+      <div class="availability-pill glass-pill">
+        <span class="availability-dot" aria-hidden="true" />
+        <span class="availability-text">
+          {availability.headline || STATUS_LABELS[availability.status]}
+        </span>
+      </div>
+
+      {!compact && availability.engagements.length > 0 && (
+        <div class="availability-engagements" aria-label="Engagement types">
+          {availability.engagements.map((item) => (
+            <span class="chip">{ENGAGEMENT_LABELS[item]}</span>
+          ))}
+        </div>
+      )}
+
+      {!compact && availability.note && (
+        <p class="availability-note">{availability.note}</p>
+      )}
+    </div>
+  )
+}
+
+<style>
+  .availability-wrap {
+    display: grid;
+    gap: 0.65rem;
+    justify-items: start;
+  }
+
+  .availability-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.55rem;
+    padding: 0.42rem 0.9rem;
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .availability-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 9999px;
+    background: #34d399;
+    box-shadow: 0 0 10px rgba(52, 211, 153, 0.7);
+  }
+
+  .availability-wrap[data-status='limited'] .availability-dot {
+    background: #fbbf24;
+    box-shadow: 0 0 10px rgba(251, 191, 36, 0.7);
+  }
+
+  .availability-wrap[data-status='booked'] .availability-dot {
+    background: #f87171;
+    box-shadow: 0 0 10px rgba(248, 113, 113, 0.6);
+  }
+
+  .availability-engagements {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  .availability-note {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+</style>

@@ -1,0 +1,291 @@
+---
+import '@fontsource-variable/inter';
+import '../styles/tokens.css';
+import '../styles/glass.css';
+import '../styles/base.css';
+import '../styles/print.css';
+import { ClientRouter } from 'astro:transitions';
+import NavBar from '../components/NavBar.astro';
+import GlassPanel from '../components/GlassPanel.astro';
+import StatsPanel from '../components/StatsPanel.astro';
+import { getBlogPosts, getProfile } from '../lib/content';
+
+interface Props {
+  title?: string;
+  description?: string;
+  ogImage?: string;
+  ogType?: 'website' | 'article';
+  noindex?: boolean;
+  canonicalPath?: string;
+  jsonLd?: Record<string, unknown> | Array<Record<string, unknown>>;
+}
+
+const [profile, blogPosts] = await Promise.all([
+  getProfile(),
+  getBlogPosts(),
+]);
+
+const {
+  title = `${profile.name} — ${profile.headline}`,
+  description = `${profile.intro}. Based in ${profile.location}.`,
+  ogImage = '/og-image.svg',
+  ogType = 'website',
+  noindex = false,
+  canonicalPath = Astro.url.pathname,
+  jsonLd,
+} = Astro.props;
+
+const siteBase = Astro.site ?? new URL(Astro.url.origin);
+const canonicalUrl = new URL(canonicalPath, siteBase).toString();
+const ogImageUrl = new URL(ogImage, siteBase).toString();
+const hasBlogPosts = blogPosts.length > 0;
+const umamiWebsiteId = import.meta.env.PUBLIC_UMAMI_WEBSITE_ID?.trim();
+
+const personSchema: Record<string, unknown> = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: profile.name,
+  alternateName: profile.fullName,
+  jobTitle: 'XR Developer & Game Programmer',
+  description,
+  url: siteBase.toString(),
+  email: `mailto:${profile.email}`,
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: 'Dhaka',
+    addressCountry: 'BD',
+  },
+  sameAs: [profile.links.github, profile.links.linkedin],
+};
+
+const structuredData = jsonLd
+  ? Array.isArray(jsonLd)
+    ? [personSchema, ...jsonLd]
+    : [personSchema, jsonLd]
+  : personSchema;
+---
+
+<!doctype html>
+<html lang={profile.i18n.defaultLocale}>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonicalUrl} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+
+    <meta name="theme-color" content="#0b0c10" />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:image" content={ogImageUrl} />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImageUrl} />
+
+    <script is:inline>
+      (() => {
+        const resolveTheme = () => {
+          try {
+            const stored = window.localStorage.getItem('theme');
+            if (stored === 'dark' || stored === 'light') return stored;
+          } catch {
+            // Ignore storage access failures
+          }
+          return window.matchMedia('(prefers-color-scheme: light)').matches
+            ? 'light'
+            : 'dark';
+        };
+
+        const applyInitialTheme = (root) => {
+          const theme = resolveTheme();
+          root.dataset.theme = theme;
+          root.classList.add('js-ready');
+          const meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) {
+            meta.setAttribute('content', theme === 'light' ? '#f5f7fc' : '#0b0c10');
+          }
+        };
+
+        applyInitialTheme(document.documentElement);
+
+        document.addEventListener('astro:before-swap', (event) => {
+          applyInitialTheme(event.newDocument.documentElement);
+        });
+      })();
+    </script>
+
+    <script
+      is:inline
+      type="application/ld+json"
+      set:html={JSON.stringify(structuredData)}
+    />
+
+    {
+      umamiWebsiteId && !noindex && (
+        <script
+          is:inline
+          defer
+          src="https://cloud.umami.is/script.js"
+          data-website-id={umamiWebsiteId}
+        />
+      )
+    }
+
+    <ClientRouter />
+  </head>
+  <body>
+    <a href="#main-content" class="skip-link">Skip to main content</a>
+
+    <div class="ambient-env" aria-hidden="true">
+      <div class="ambient-orb ambient-orb--1"></div>
+      <div class="ambient-orb ambient-orb--2"></div>
+      <div class="ambient-orb ambient-orb--3"></div>
+    </div>
+
+    <NavBar showBlog={hasBlogPosts} brandName={profile.name} />
+
+    <main id="main-content" class="site-main">
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="container">
+        <GlassPanel variant="panel" padding="md">
+          <div class="footer-inner">
+            <div class="footer-meta">
+              <p>
+                <strong>{profile.name}</strong> · {profile.location}
+              </p>
+              <p>&copy; {new Date().getFullYear()} {profile.name}. Built with Astro &amp; Liquid Glass.</p>
+            </div>
+            <StatsPanel />
+            <div class="footer-links">
+              <a class="chip" href={profile.links.github} target="_blank" rel="noopener">
+                GitHub
+              </a>
+              <a class="chip" href={profile.links.linkedin} target="_blank" rel="noopener">
+                LinkedIn
+              </a>
+              <a class="chip" href={`mailto:${profile.email}`}>
+                {profile.email}
+              </a>
+            </div>
+          </div>
+        </GlassPanel>
+      </div>
+    </footer>
+
+    <script>
+      let cleanupEffects: (() => void) | null = null;
+
+      function trackUmamiEvent(
+        name: string,
+        data?: Record<string, string>
+      ): void {
+        const umami = (
+          window as unknown as {
+            umami?: { track?: (n: string, d?: Record<string, string>) => void };
+          }
+        ).umami;
+        if (typeof umami?.track === 'function') {
+          umami.track(name, data);
+        }
+      }
+
+      function initGlassEffects(): void {
+        cleanupEffects?.();
+        const controller = new AbortController();
+        const { signal } = controller;
+
+        const prefersReducedMotion = window.matchMedia(
+          '(prefers-reduced-motion: reduce)'
+        ).matches;
+
+        // Scroll reveals
+        const revealEls = Array.from(document.querySelectorAll<HTMLElement>('.reveal'));
+        let revealObserver: IntersectionObserver | null = null;
+
+        if (prefersReducedMotion || !('IntersectionObserver' in window)) {
+          revealEls.forEach((el) => el.classList.add('is-visible'));
+        } else if (revealEls.length > 0) {
+          revealObserver = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                  entry.target.classList.add('is-visible');
+                  revealObserver?.unobserve(entry.target);
+                }
+              });
+            },
+            { threshold: 0.08, rootMargin: '0px 0px -32px 0px' }
+          );
+          revealEls.forEach((el) => revealObserver?.observe(el));
+        }
+
+        // Section & project analytics events
+        const seenSections = new Set<string>();
+        const sectionEls = Array.from(
+          document.querySelectorAll<HTMLElement>('section[id]')
+        );
+        let sectionObserver: IntersectionObserver | null = null;
+
+        if (sectionEls.length > 0 && 'IntersectionObserver' in window) {
+          sectionObserver = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                if (entry.isIntersecting && !seenSections.has(entry.target.id)) {
+                  seenSections.add(entry.target.id);
+                  trackUmamiEvent('section_view', { section: entry.target.id });
+                }
+              });
+            },
+            { threshold: 0.35 }
+          );
+          sectionEls.forEach((sec) => sectionObserver?.observe(sec));
+        }
+
+        const caseStudyEl = document.querySelector<HTMLElement>('[data-project-slug]');
+        if (caseStudyEl?.dataset.projectSlug) {
+          trackUmamiEvent('project_view', {
+            project: caseStudyEl.dataset.projectSlug,
+          });
+        }
+
+        // Pointer spotlight for interactive glass panels
+        if (
+          !prefersReducedMotion &&
+          window.matchMedia('(hover: hover) and (pointer: fine)').matches
+        ) {
+          document
+            .querySelectorAll<HTMLElement>('[data-spotlight="true"]')
+            .forEach((panel) => {
+              panel.addEventListener(
+                'pointermove',
+                (event) => {
+                  const rect = panel.getBoundingClientRect();
+                  const x = event.clientX - rect.left;
+                  const y = event.clientY - rect.top;
+                  panel.style.setProperty('--spot-x', `${x}px`);
+                  panel.style.setProperty('--spot-y', `${y}px`);
+                },
+                { signal }
+              );
+            });
+        }
+
+        cleanupEffects = () => {
+          revealObserver?.disconnect();
+          sectionObserver?.disconnect();
+          controller.abort();
+        };
+      }
+
+      document.addEventListener('astro:page-load', initGlassEffects);
+    </script>
+  </body>
+</html>

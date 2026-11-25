@@ -1,0 +1,311 @@
+---
+export interface LightboxItem {
+  src: string;
+  alt: string;
+  caption?: string;
+  type: 'image' | 'video';
+}
+
+interface Props {
+  items: LightboxItem[];
+}
+
+const { items } = Astro.props;
+---
+
+{
+  items.length > 0 && (
+    <div
+      class="lightbox-backdrop"
+      data-lightbox
+      hidden
+    >
+      <div
+        class="glass-surface glass-modal lightbox-dialog"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Media gallery viewer"
+      >
+        <div class="lightbox-toolbar">
+          <span class="chip lightbox-counter" data-lightbox-counter>
+            1 / {items.length}
+          </span>
+          <div class="lightbox-nav">
+            <button
+              type="button"
+              class="glass-pill lightbox-btn"
+              data-lightbox-prev
+              aria-label="Previous media item"
+              disabled={items.length <= 1}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="m15 18-6-6 6-6"></path>
+              </svg>
+            </button>
+            <button
+              type="button"
+              class="glass-pill lightbox-btn"
+              data-lightbox-next
+              aria-label="Next media item"
+              disabled={items.length <= 1}
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="m9 18 6-6-6-6"></path>
+              </svg>
+            </button>
+            <button
+              type="button"
+              class="glass-pill lightbox-btn"
+              data-lightbox-close
+              aria-label="Close media viewer"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M18 6 6 18"></path>
+                <path d="m6 6 12 12"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div class="lightbox-stage" data-lightbox-stage />
+
+        <p class="lightbox-caption" data-lightbox-caption hidden />
+      </div>
+
+      <script
+        is:inline
+        type="application/json"
+        data-lightbox-items
+        set:html={JSON.stringify(items)}
+      />
+    </div>
+  )
+}
+
+<style>
+  .lightbox-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    background: rgba(5, 7, 12, 0.72);
+    display: grid;
+    place-items: center;
+    padding: clamp(0.75rem, 3vw, 2rem);
+  }
+
+  .lightbox-backdrop[hidden] {
+    display: none;
+  }
+
+  .lightbox-dialog {
+    width: min(1040px, 100%);
+    max-height: 90vh;
+    padding: clamp(0.9rem, 2vw, 1.35rem);
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    gap: 0.85rem;
+  }
+
+  .lightbox-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .lightbox-nav {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+  }
+
+  .lightbox-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition: background-color var(--duration-fast) ease, border-color var(--duration-fast) ease;
+  }
+
+  .lightbox-btn:hover:not(:disabled) {
+    background: var(--glass-pill-hover);
+    border-color: var(--glass-border-strong);
+  }
+
+  .lightbox-btn:disabled {
+    opacity: 0.35;
+    cursor: default;
+  }
+
+  .lightbox-stage {
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    border-radius: var(--radius-sm);
+    background: rgba(0, 0, 0, 0.25);
+    min-height: 240px;
+  }
+
+  :global(.lightbox-stage img),
+  :global(.lightbox-stage video) {
+    max-width: 100%;
+    max-height: 68vh;
+    object-fit: contain;
+    border-radius: var(--radius-sm);
+  }
+
+  .lightbox-caption {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    text-align: center;
+  }
+</style>
+
+<script>
+  interface LightboxItemData {
+    src: string;
+    alt: string;
+    caption?: string;
+    type: 'image' | 'video';
+  }
+
+  let cleanupLightbox: (() => void) | null = null;
+
+  function initLightbox(): void {
+    cleanupLightbox?.();
+    const backdrop = document.querySelector<HTMLElement>('[data-lightbox]');
+    if (!backdrop) return;
+
+    const dataEl = backdrop.querySelector<HTMLScriptElement>('[data-lightbox-items]');
+    if (!dataEl?.textContent) return;
+
+    let items: LightboxItemData[] = [];
+    try {
+      items = JSON.parse(dataEl.textContent) as LightboxItemData[];
+    } catch {
+      return;
+    }
+    if (items.length === 0) return;
+
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    const stage = backdrop.querySelector<HTMLElement>('[data-lightbox-stage]');
+    const counter = backdrop.querySelector<HTMLElement>('[data-lightbox-counter]');
+    const captionEl = backdrop.querySelector<HTMLElement>('[data-lightbox-caption]');
+    const prevBtn = backdrop.querySelector<HTMLButtonElement>('[data-lightbox-prev]');
+    const nextBtn = backdrop.querySelector<HTMLButtonElement>('[data-lightbox-next]');
+    const closeBtn = backdrop.querySelector<HTMLButtonElement>('[data-lightbox-close]');
+
+    let currentIndex = 0;
+    let lastTrigger: HTMLElement | null = null;
+
+    const stopActiveMedia = () => {
+      stage?.querySelectorAll('video').forEach((video) => {
+        video.pause();
+      });
+    };
+
+    const renderItem = (index: number) => {
+      if (!stage) return;
+      stopActiveMedia();
+
+      currentIndex = (index + items.length) % items.length;
+      const item = items[currentIndex];
+      stage.textContent = '';
+
+      if (item.type === 'video') {
+        const video = document.createElement('video');
+        video.src = item.src;
+        video.controls = true;
+        video.playsInline = true;
+        video.preload = 'metadata';
+        video.setAttribute('aria-label', item.alt);
+        stage.appendChild(video);
+      } else {
+        const img = document.createElement('img');
+        img.src = item.src;
+        img.alt = item.alt;
+        stage.appendChild(img);
+      }
+
+      if (counter) {
+        counter.textContent = `${currentIndex + 1} / ${items.length}`;
+      }
+
+      if (captionEl) {
+        const text = item.caption || item.alt;
+        captionEl.textContent = text;
+        captionEl.hidden = !text;
+      }
+    };
+
+    const openAt = (index: number, trigger: HTMLElement | null) => {
+      lastTrigger = trigger;
+      renderItem(index);
+      backdrop.hidden = false;
+      document.body.style.overflow = 'hidden';
+      closeBtn?.focus();
+    };
+
+    const closeModal = () => {
+      if (backdrop.hidden) return;
+      stopActiveMedia();
+      backdrop.hidden = true;
+      document.body.style.overflow = '';
+      lastTrigger?.focus();
+      lastTrigger = null;
+    };
+
+    document.querySelectorAll<HTMLElement>('[data-lightbox-trigger]').forEach((trigger) => {
+      trigger.addEventListener(
+        'click',
+        () => {
+          const idx = Number(trigger.dataset.lightboxIndex || '0');
+          openAt(Number.isNaN(idx) ? 0 : idx, trigger);
+        },
+        { signal }
+      );
+    });
+
+    prevBtn?.addEventListener('click', () => renderItem(currentIndex - 1), { signal });
+    nextBtn?.addEventListener('click', () => renderItem(currentIndex + 1), { signal });
+    closeBtn?.addEventListener('click', closeModal, { signal });
+
+    backdrop.addEventListener(
+      'click',
+      (event) => {
+        if (event.target === backdrop) {
+          closeModal();
+        }
+      },
+      { signal }
+    );
+
+    window.addEventListener(
+      'keydown',
+      (event) => {
+        if (backdrop.hidden) return;
+        if (event.key === 'Escape') {
+          closeModal();
+        } else if (event.key === 'ArrowLeft' && items.length > 1) {
+          renderItem(currentIndex - 1);
+        } else if (event.key === 'ArrowRight' && items.length > 1) {
+          renderItem(currentIndex + 1);
+        }
+      },
+      { signal }
+    );
+
+    cleanupLightbox = () => {
+      stopActiveMedia();
+      document.body.style.overflow = '';
+      controller.abort();
+    };
+  }
+
+  document.addEventListener('astro:page-load', initLightbox);
+</script>

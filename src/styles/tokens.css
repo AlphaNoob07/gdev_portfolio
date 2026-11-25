@@ -1,0 +1,134 @@
+:root {
+  color-scheme: dark;
+
+  /* Environment & Canvas */
+  --bg-canvas: #06070a;
+  --bg-base: #0b0c10;
+  --orb-1: rgba(59, 130, 246, 0.24);
+  --orb-2: rgba(139, 92, 246, 0.2);
+  --orb-3: rgba(56, 189, 248, 0.14);
+
+  /* Typography */
+  --font-sans: 'Inter Variable', system-ui, -apple-system, BlinkMacSystemFont,
+    'Segoe UI', sans-serif;
+  --text-primary: #f5f7fb;
+  --text-secondary: #b6c0d4;
+  --text-muted: #8f9bb3;
+  --text-on-accent: #ffffff;
+
+  /* Fluid Type Scale */
+  --text-xs: clamp(0.75rem, 0.72rem + 0.12vw, 0.8125rem);
+  --text-sm: clamp(0.875rem, 0.84rem + 0.15vw, 0.9375rem);
+  --text-base: clamp(1rem, 0.96rem + 0.2vw, 1.0625rem);
+  --text-lg: clamp(1.125rem, 1.05rem + 0.35vw, 1.25rem);
+  --text-xl: clamp(1.35rem, 1.2rem + 0.7vw, 1.75rem);
+  --text-2xl: clamp(1.75rem, 1.4rem + 1.5vw, 2.5rem);
+  --text-display: clamp(2.25rem, 1.65rem + 2.8vw, 3.85rem);
+
+  /* Accents */
+  --accent-blue: #60a5fa;
+  --accent-violet: #a78bfa;
+  --accent-strong: #3b82f6;
+  --accent-gradient: linear-gradient(135deg, #60a5fa 0%, #8b5cf6 100%);
+  --focus-ring: rgba(96, 165, 250, 0.75);
+
+  /* Liquid Glass Surfaces */
+  --glass-bg: rgba(19, 22, 31, 0.58);
+  --glass-bg-elevated: rgba(25, 29, 41, 0.7);
+  --glass-bg-fallback: rgba(18, 21, 30, 0.9);
+  --glass-bg-opaque: #131620;
+  --glass-pill-bg: rgba(255, 255, 255, 0.08);
+  --glass-pill-hover: rgba(255, 255, 255, 0.14);
+  --glass-border: rgba(255, 255, 255, 0.14);
+  --glass-border-strong: rgba(255, 255, 255, 0.24);
+  --glass-specular: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(255, 255, 255, 0.04) 24%,
+    rgba(255, 255, 255, 0) 60%
+  );
+  --glass-spotlight-color: rgba(147, 197, 253, 0.14);
+  --glass-shadow:
+    0 24px 48px -16px rgba(0, 0, 0, 0.65),
+    0 6px 16px -4px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.16);
+  --glass-shadow-sm:
+    0 12px 28px -10px rgba(0, 0, 0, 0.55),
+    0 2px 8px -2px rgba(0, 0, 0, 0.35),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.14);
+
+  /* Radii & Motion */
+  --radius-panel: 28px;
+  --radius-card: 24px;
+  --radius-sm: 16px;
+  --radius-pill: 9999px;
+  --ease-spring: cubic-bezier(0.22, 1, 0.36, 1);
+  --duration-fast: 180ms;
+  --duration-base: 320ms;
+  --duration-slow: 560ms;
+
+  /* Layout */
+  --container-max: 1160px;
+  --space-section: clamp(4rem, 7vw, 6.5rem);
+  --z-env: 0;
+  --z-base: 1;
+  --z-nav: 40;
+  --z-sheet: 60;
+  --z-modal: 80;
+}
+
+[data-theme='light'] {
+  color-scheme: light;
+
+  /* Environment & Canvas */
+  --bg-canvas: #e9eef7;
+  --bg-base: #f5f7fc;
+  --orb-1: rgba(37, 99, 235, 0.16);
+  --orb-2: rgba(99, 102, 241, 0.14);
+  --orb-3: rgba(14, 165, 233, 0.12);
+
+  /* Typography */
+  --text-primary: #0f172a;
+  --text-secondary: #334155;
+  --text-muted: #475569;
+  --text-on-accent: #ffffff;
+
+  /* Accents */
+  --accent-blue: #2563eb;
+  --accent-violet: #6366f1;
+  --accent-strong: #1d4ed8;
+  --accent-gradient: linear-gradient(135deg, #2563eb 0%, #6366f1 100%);
+  --focus-ring: rgba(37, 99, 235, 0.65);
+
+  /* Liquid Glass Surfaces */
+  --glass-bg: rgba(255, 255, 255, 0.66);
+  --glass-bg-elevated: rgba(255, 255, 255, 0.8);
+  --glass-bg-fallback: rgba(248, 250, 253, 0.94);
+  --glass-bg-opaque: #f8fafd;
+  --glass-pill-bg: rgba(15, 23, 42, 0.055);
+  --glass-pill-hover: rgba(15, 23, 42, 0.1);
+  --glass-border: rgba(15, 23, 42, 0.11);
+  --glass-border-strong: rgba(15, 23, 42, 0.2);
+  --glass-specular: linear-gradient(
+    180deg,
+    rgba(255, 255, 255, 0.88) 0%,
+    rgba(255, 255, 255, 0.22) 26%,
+    rgba(255, 255, 255, 0) 60%
+  );
+  --glass-spotlight-color: rgba(37, 99, 235, 0.09);
+  --glass-shadow:
+    0 24px 48px -18px rgba(15, 23, 42, 0.14),
+    0 6px 16px -4px rgba(15, 23, 42, 0.08),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
+  --glass-shadow-sm:
+    0 12px 26px -10px rgba(15, 23, 42, 0.11),
+    0 2px 8px -2px rgba(15, 23, 42, 0.06),
+    inset 0 1px 0 0 rgba(255, 255, 255, 0.85);
+}
+
+@media (max-width: 768px) {
+  :root {
+    --radius-panel: 22px;
+    --radius-card: 20px;
+  }
+}

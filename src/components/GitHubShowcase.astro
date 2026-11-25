@@ -1,0 +1,525 @@
+---
+import GlassPanel from './GlassPanel.astro';
+import type { ProfileData } from '../lib/content';
+import { getGitHubSnapshot } from '../lib/github';
+
+interface Props {
+  profile: ProfileData;
+}
+
+const { profile } = Astro.props;
+const initialData = getGitHubSnapshot(profile.curatedRepos, false);
+const topRepos = initialData.repos.slice(0, 6);
+
+function formatDate(iso: string): string {
+  const parsed = Date.parse(iso);
+  if (Number.isNaN(parsed)) return '';
+  return new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  }).format(new Date(parsed));
+}
+---
+
+<section id="github" class="section reveal" data-github-showcase>
+  <div class="container">
+    <div class="gh-header">
+      <div class="section-head gh-head">
+        <span class="eyebrow">Open Source &amp; Activity</span>
+        <h2 class="section-title">GitHub Showcase</h2>
+        <p class="section-subtitle">
+          Public repositories, curated XR/Unity samples, and recent engineering activity from @{profile.githubUsername}.
+        </p>
+      </div>
+
+      <div class="gh-actions">
+        <span class="chip gh-source-pill" data-github-source>
+          {initialData.source === 'live' ? 'Live' : 'Cached Snapshot'}
+        </span>
+        <a
+          class="btn"
+          href={profile.links.github}
+          target="_blank"
+          rel="noopener"
+        >
+          View on GitHub &rarr;
+        </a>
+      </div>
+    </div>
+
+    <div class="gh-repos-grid" data-github-repos>
+      {
+        topRepos.length > 0 ? (
+          topRepos.map((repo) => (
+            <GlassPanel as="article" variant="card" padding="md" interactive>
+              <div class="gh-repo-inner">
+                <div class="gh-repo-top">
+                  <h3 class="gh-repo-name">
+                    <a href={repo.htmlUrl} target="_blank" rel="noopener">
+                      {repo.name}
+                    </a>
+                  </h3>
+                  {repo.curated && <span class="chip gh-curated">Curated</span>}
+                </div>
+
+                {repo.description && (
+                  <p class="gh-repo-desc">{repo.description}</p>
+                )}
+
+                <div class="gh-repo-meta">
+                  {repo.language && <span class="chip">{repo.language}</span>}
+                  <span class="chip">&#9733; {repo.stars}</span>
+                  <span class="chip">Forks {repo.forks}</span>
+                  {formatDate(repo.updatedAt) && (
+                    <span class="gh-updated">Updated {formatDate(repo.updatedAt)}</span>
+                  )}
+                </div>
+              </div>
+            </GlassPanel>
+          ))
+        ) : (
+          <GlassPanel variant="card" padding="md">
+            <p class="gh-repo-desc">
+              Public repositories load dynamically when connected to GitHub. Visit{' '}
+              <a href={profile.links.github} target="_blank" rel="noopener">
+                @{profile.githubUsername}
+              </a>{' '}
+              directly anytime.
+            </p>
+          </GlassPanel>
+        )
+      }
+    </div>
+
+    <div class="gh-secondary-grid">
+      <GlassPanel
+        variant="panel"
+        padding="md"
+        class={`gh-calendar-panel${initialData.contributions ? '' : ' is-empty'}`}
+      >
+        <div class="gh-panel-head">
+          <h3 class="gh-panel-title">Contribution Calendar</h3>
+          <span class="gh-panel-meta" data-github-contrib-total>
+            {initialData.contributions
+              ? `${initialData.contributions.total} contributions in the last year`
+              : ''}
+          </span>
+        </div>
+        <div class="gh-calendar-grid" data-github-calendar>
+          {
+            initialData.contributions?.weeks.map((week) => (
+              <div class="gh-week">
+                {week.days.map((day) => (
+                  <span
+                    class="gh-day"
+                    data-level={day.level}
+                    title={`${day.date}: ${day.count} contributions`}
+                  />
+                ))}
+              </div>
+            ))
+          }
+        </div>
+      </GlassPanel>
+
+      <GlassPanel
+        variant="panel"
+        padding="md"
+        class={`gh-activity-panel${initialData.activity.length > 0 ? '' : ' is-empty'}`}
+      >
+        <div class="gh-panel-head">
+          <h3 class="gh-panel-title">Recent Public Activity</h3>
+        </div>
+        <ul class="gh-activity-list" data-github-activity>
+          {
+            initialData.activity.slice(0, 6).map((item) => (
+              <li class="gh-activity-item">
+                <a href={item.repoUrl} target="_blank" rel="noopener">
+                  {item.summary}
+                </a>
+                <span>{formatDate(item.createdAt)}</span>
+              </li>
+            ))
+          }
+        </ul>
+      </GlassPanel>
+    </div>
+  </div>
+</section>
+
+<style>
+  .gh-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .gh-head {
+    margin-bottom: 0;
+  }
+
+  .gh-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.65rem;
+  }
+
+  .gh-repos-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+    gap: 1.15rem;
+  }
+
+  .gh-repo-inner {
+    display: grid;
+    gap: 0.75rem;
+    height: 100%;
+    align-content: start;
+  }
+
+  .gh-repo-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .gh-repo-name {
+    font-size: var(--text-lg);
+    font-weight: 650;
+    letter-spacing: -0.015em;
+  }
+
+  .gh-repo-name a {
+    text-decoration: none;
+  }
+
+  .gh-repo-name a:hover {
+    color: var(--accent-blue);
+  }
+
+  .gh-curated {
+    color: var(--accent-blue);
+    border-color: var(--glass-border-strong);
+  }
+
+  .gh-repo-desc {
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    line-height: 1.55;
+  }
+
+  .gh-repo-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+    margin-top: auto;
+    padding-top: 0.35rem;
+  }
+
+  .gh-updated {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    margin-left: auto;
+  }
+
+  .gh-secondary-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
+    gap: 1.15rem;
+    margin-top: 1.25rem;
+  }
+
+  :global(.gh-calendar-panel.is-empty),
+  :global(.gh-activity-panel.is-empty) {
+    display: none;
+  }
+
+  .gh-panel-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.85rem;
+  }
+
+  .gh-panel-title {
+    font-size: var(--text-base);
+    font-weight: 650;
+  }
+
+  .gh-panel-meta {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+  }
+
+  .gh-calendar-grid {
+    display: flex;
+    gap: 3px;
+    overflow-x: auto;
+    padding-bottom: 0.25rem;
+  }
+
+  .gh-week {
+    display: grid;
+    grid-template-rows: repeat(7, 10px);
+    gap: 3px;
+  }
+
+  .gh-day {
+    width: 10px;
+    height: 10px;
+    border-radius: 3px;
+    background: var(--glass-pill-bg);
+    border: 1px solid rgba(255, 255, 255, 0.04);
+  }
+
+  .gh-day[data-level='1'] {
+    background: rgba(96, 165, 250, 0.28);
+  }
+
+  .gh-day[data-level='2'] {
+    background: rgba(96, 165, 250, 0.5);
+  }
+
+  .gh-day[data-level='3'] {
+    background: rgba(96, 165, 250, 0.74);
+  }
+
+  .gh-day[data-level='4'] {
+    background: var(--accent-blue);
+  }
+
+  .gh-activity-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.55rem;
+  }
+
+  .gh-activity-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.75rem;
+    font-size: var(--text-sm);
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--glass-border);
+  }
+
+  .gh-activity-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+
+  .gh-activity-item a {
+    color: var(--text-secondary);
+    text-decoration: none;
+  }
+
+  .gh-activity-item a:hover {
+    color: var(--text-primary);
+  }
+
+  .gh-activity-item span {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+    white-space: nowrap;
+  }
+</style>
+
+<script>
+  interface LiveRepo {
+    name: string;
+    description: string | null;
+    htmlUrl: string;
+    language: string | null;
+    stars: number;
+    forks: number;
+    updatedAt: string;
+    curated: boolean;
+  }
+
+  interface LiveActivity {
+    repoUrl: string;
+    summary: string;
+    createdAt: string;
+  }
+
+  interface LiveContributions {
+    total: number;
+    weeks: Array<{
+      days: Array<{ date: string; count: number; level: number }>;
+    }>;
+  }
+
+  interface LivePayload {
+    source: 'live' | 'snapshot';
+    repos: LiveRepo[];
+    activity: LiveActivity[];
+    contributions: LiveContributions | null;
+  }
+
+  let cleanupGithub: (() => void) | null = null;
+
+  function formatShortDate(iso: string): string {
+    const ms = Date.parse(iso);
+    if (Number.isNaN(ms)) return '';
+    return new Intl.DateTimeFormat('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    }).format(new Date(ms));
+  }
+
+  function initGitHubShowcase(): void {
+    cleanupGithub?.();
+    const section = document.querySelector<HTMLElement>('[data-github-showcase]');
+    if (!section) return;
+
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    const sourceEl = section.querySelector<HTMLElement>('[data-github-source]');
+    const reposGrid = section.querySelector<HTMLElement>('[data-github-repos]');
+    const calendarPanel = section.querySelector<HTMLElement>('.gh-calendar-panel');
+    const calendarGrid = section.querySelector<HTMLElement>('[data-github-calendar]');
+    const contribTotal = section.querySelector<HTMLElement>('[data-github-contrib-total]');
+    const activityPanel = section.querySelector<HTMLElement>('.gh-activity-panel');
+    const activityList = section.querySelector<HTMLElement>('[data-github-activity]');
+
+    fetch('/api/github', { signal })
+      .then((res) => (res.ok ? (res.json() as Promise<LivePayload>) : null))
+      .then((data) => {
+        if (!data || signal.aborted) return;
+
+        if (sourceEl) {
+          sourceEl.textContent = data.source === 'live' ? 'Live' : 'Cached Snapshot';
+        }
+
+        if (reposGrid && Array.isArray(data.repos) && data.repos.length > 0) {
+          reposGrid.textContent = '';
+          data.repos.slice(0, 6).forEach((repo) => {
+            const article = document.createElement('article');
+            article.className = 'glass-surface glass-card glass-pad-md glass-spotlight';
+            article.dataset.spotlight = 'true';
+
+            const inner = document.createElement('div');
+            inner.className = 'gh-repo-inner';
+
+            const top = document.createElement('div');
+            top.className = 'gh-repo-top';
+
+            const h3 = document.createElement('h3');
+            h3.className = 'gh-repo-name';
+            const link = document.createElement('a');
+            link.href = repo.htmlUrl;
+            link.target = '_blank';
+            link.rel = 'noopener';
+            link.textContent = repo.name;
+            h3.appendChild(link);
+            top.appendChild(h3);
+
+            if (repo.curated) {
+              const badge = document.createElement('span');
+              badge.className = 'chip gh-curated';
+              badge.textContent = 'Curated';
+              top.appendChild(badge);
+            }
+            inner.appendChild(top);
+
+            if (repo.description) {
+              const desc = document.createElement('p');
+              desc.className = 'gh-repo-desc';
+              desc.textContent = repo.description;
+              inner.appendChild(desc);
+            }
+
+            const meta = document.createElement('div');
+            meta.className = 'gh-repo-meta';
+            if (repo.language) {
+              const lang = document.createElement('span');
+              lang.className = 'chip';
+              lang.textContent = repo.language;
+              meta.appendChild(lang);
+            }
+            const stars = document.createElement('span');
+            stars.className = 'chip';
+            stars.textContent = `★ ${repo.stars}`;
+            meta.appendChild(stars);
+
+            const forks = document.createElement('span');
+            forks.className = 'chip';
+            forks.textContent = `Forks ${repo.forks}`;
+            meta.appendChild(forks);
+
+            const formatted = formatShortDate(repo.updatedAt);
+            if (formatted) {
+              const upd = document.createElement('span');
+              upd.className = 'gh-updated';
+              upd.textContent = `Updated ${formatted}`;
+              meta.appendChild(upd);
+            }
+
+            inner.appendChild(meta);
+            article.appendChild(inner);
+            reposGrid.appendChild(article);
+          });
+        }
+
+        if (data.contributions && calendarGrid && calendarPanel) {
+          calendarPanel.classList.remove('is-empty');
+          if (contribTotal) {
+            contribTotal.textContent = `${data.contributions.total} contributions in the last year`;
+          }
+          calendarGrid.textContent = '';
+          data.contributions.weeks.forEach((week) => {
+            const weekEl = document.createElement('div');
+            weekEl.className = 'gh-week';
+            week.days.forEach((day) => {
+              const dayEl = document.createElement('span');
+              dayEl.className = 'gh-day';
+              dayEl.dataset.level = String(day.level);
+              dayEl.title = `${day.date}: ${day.count} contributions`;
+              weekEl.appendChild(dayEl);
+            });
+            calendarGrid.appendChild(weekEl);
+          });
+        }
+
+        if (activityList && activityPanel && Array.isArray(data.activity) && data.activity.length > 0) {
+          activityPanel.classList.remove('is-empty');
+          activityList.textContent = '';
+          data.activity.slice(0, 6).forEach((item) => {
+            const li = document.createElement('li');
+            li.className = 'gh-activity-item';
+            const a = document.createElement('a');
+            a.href = item.repoUrl;
+            a.target = '_blank';
+            a.rel = 'noopener';
+            a.textContent = item.summary;
+            const dateSpan = document.createElement('span');
+            dateSpan.textContent = formatShortDate(item.createdAt);
+            li.appendChild(a);
+            li.appendChild(dateSpan);
+            activityList.appendChild(li);
+          });
+        }
+      })
+      .catch(() => {
+        // Keep build-time snapshot silently
+      });
+
+    cleanupGithub = () => controller.abort();
+  }
+
+  document.addEventListener('astro:page-load', initGitHubShowcase);
+</script>

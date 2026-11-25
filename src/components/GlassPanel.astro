@@ -1,0 +1,38 @@
+---
+interface Props {
+  as?: 'div' | 'section' | 'article' | 'aside' | 'nav' | 'header' | 'footer';
+  variant?: 'panel' | 'card' | 'pill' | 'sheet';
+  interactive?: boolean;
+  padding?: 'none' | 'sm' | 'md' | 'lg';
+  id?: string;
+  class?: string;
+  ariaLabel?: string;
+}
+
+const {
+  as = 'div',
+  variant = 'panel',
+  interactive = false,
+  padding = 'md',
+  id,
+  class: className,
+  ariaLabel,
+} = Astro.props;
+
+const Tag = as;
+---
+
+<Tag
+  id={id}
+  aria-label={ariaLabel}
+  data-spotlight={interactive ? 'true' : undefined}
+  class:list={[
+    'glass-surface',
+    `glass-${variant}`,
+    `glass-pad-${padding}`,
+    interactive && 'glass-spotlight',
+    className,
+  ]}
+>
+  <slot />
+</Tag>

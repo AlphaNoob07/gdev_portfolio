@@ -1,0 +1,191 @@
+categories:
+  - id: "engines"
+    label: "Engines"
+    skills:
+      - name: "Unity"
+        source: "resume"
+        relatedProjects:
+          - "stellar-vr-explorer"
+          - "ar-museum-guide"
+          - "biolab-vr"
+          - "rhythm-dimension"
+          - "virtucare-gynecology-ar-sim"
+          - "virtucare-ar-anatomy"
+          - "xr-sports-viewing"
+          - "ai-football-tactical-analysis"
+          - "android-xr-prototypes"
+          - "teen-patti-multiplayer"
+          - "kinect-red-light-green-light"
+          - "ai-ar-fitting-room"
+          - "ar-shooter"
+          - "example-ar-image-tracking"
+      - name: "Unreal Engine"
+        source: "resume"
+        relatedProjects:
+          - "quantum-warriors"
+          - "ue5-vr-ar-booth"
+      - name: "UEFN"
+        source: "resume"
+        relatedProjects: []
+      - name: "Phaser"
+        source: "resume"
+        relatedProjects: []
+      - name: "Solar2D"
+        source: "resume"
+        relatedProjects: []
+
+  - id: "programming"
+    label: "Programming"
+    skills:
+      - name: "C#"
+        source: "resume"
+        relatedProjects:
+          - "stellar-vr-explorer"
+          - "ar-museum-guide"
+          - "biolab-vr"
+          - "rhythm-dimension"
+          - "virtucare-gynecology-ar-sim"
+          - "virtucare-ar-anatomy"
+          - "xr-sports-viewing"
+          - "ai-football-tactical-analysis"
+          - "android-xr-prototypes"
+          - "teen-patti-multiplayer"
+          - "kinect-red-light-green-light"
+          - "ai-ar-fitting-room"
+          - "ar-shooter"
+          - "example-ar-image-tracking"
+      - name: "C++"
+        source: "github-readme"
+        relatedProjects:
+          - "quantum-warriors"
+          - "ue5-vr-ar-booth"
+      - name: "Blueprint"
+        source: "resume"
+        relatedProjects:
+          - "quantum-warriors"
+          - "ue5-vr-ar-booth"
+      - name: "JavaScript"
+        source: "resume"
+        relatedProjects: []
+      - name: "Node.js"
+        source: "resume"
+        relatedProjects: []
+      - name: "Python"
+        source: "github-readme"
+        relatedProjects:
+          - "ai-football-tactical-analysis"
+          - "ai-ar-fitting-room"
+      - name: "Lua"
+        source: "resume"
+        relatedProjects: []
+      - name: "Verse"
+        source: "resume"
+        relatedProjects: []
+      - name: "HTML5/CSS"
+        source: "resume"
+        relatedProjects: []
+
+  - id: "xr-spatial"
+    label: "XR & Spatial"
+    skills:
+      - name: "AR/VR"
+        source: "resume"
+        relatedProjects:
+          - "stellar-vr-explorer"
+          - "ar-museum-guide"
+          - "quantum-warriors"
+          - "ar-home-designer"
+          - "biolab-vr"
+          - "rhythm-dimension"
+          - "virtucare-gynecology-ar-sim"
+          - "virtucare-ar-anatomy"
+          - "xr-sports-viewing"
+          - "android-xr-prototypes"
+          - "ue5-vr-ar-booth"
+          - "ar-shooter"
+          - "example-ar-image-tracking"
+      - name: "OpenXR"
+        source: "tulip-generic"
+        relatedProjects:
+          - "xr-sports-viewing"
+          - "android-xr-prototypes"
+      - name: "Android XR"
+        source: "tulip-generic"
+        relatedProjects:
+          - "android-xr-prototypes"
+      - name: "XREAL SDK"
+        source: "github-readme"
+        relatedProjects:
+          - "xr-sports-viewing"
+      - name: "AR Foundation"
+        source: "github-readme"
+        relatedProjects:
+          - "virtucare-gynecology-ar-sim"
+          - "virtucare-ar-anatomy"
+          - "ar-shooter"
+          - "example-ar-image-tracking"
+      - name: "ARKit"
+        source: "github-readme"
+        relatedProjects:
+          - "ar-home-designer"
+      - name: "ARCore"
+        source: "github-readme"
+        relatedProjects:
+          - "ar-museum-guide"
+      - name: "MRTK"
+        source: "github-readme"
+        relatedProjects: []
+      - name: "Oculus SDK"
+        source: "github-readme"
+        relatedProjects:
+          - "stellar-vr-explorer"
+      - name: "Vuforia"
+        source: "github-readme"
+        relatedProjects: []
+      - name: "Wikitude"
+        source: "github-readme"
+        relatedProjects: []
+      - name: "Immersal"
+        source: "github-readme"
+        relatedProjects: []
+      - name: "Quest/Vive/HoloLens"
+        source: "github-readme"
+        relatedProjects:
+          - "stellar-vr-explorer"
+          - "ue5-vr-ar-booth"
+
+  - id: "game-dev"
+    label: "Game Dev"
+    skills:
+      - name: "Photon PUN 2"
+        source: "github-readme"
+        relatedProjects:
+          - "stellar-vr-explorer"
+          - "teen-patti-multiplayer"
+      - name: "Mirror"
+        source: "github-readme"
+        relatedProjects: []
+      - name: "Netcode"
+        source: "github-readme"
+        relatedProjects: []
+      - name: "Kinect/Azure Kinect"
+        source: "github-readme"
+        relatedProjects:
+          - "kinect-red-light-green-light"
+
+  - id: "ai-emerging"
+    label: "AI & Emerging"
+    skills:
+      - name: "Computer Vision"
+        source: "tulip-generic"
+        relatedProjects:
+          - "ai-football-tactical-analysis"
+          - "ai-ar-fitting-room"
+      - name: "ONNX / Unity Inference Engine"
+        source: "tulip-generic"
+        relatedProjects:
+          - "ai-football-tactical-analysis"
+      - name: "MediaPipe"
+        source: "tulip-generic"
+        relatedProjects:
+          - "ai-ar-fitting-room"

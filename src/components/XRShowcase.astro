@@ -1,0 +1,254 @@
+---
+import GlassPanel from './GlassPanel.astro';
+
+interface Props {
+  projectTitles: Map<string, string>;
+  enableModelPreview?: boolean;
+}
+
+const { projectTitles, enableModelPreview = false } = Astro.props;
+
+interface XRCapability {
+  title: string;
+  summary: string;
+  tech: string[];
+  projects: string[];
+}
+
+const capabilities: XRCapability[] = [
+  {
+    title: 'Augmented Reality (AR)',
+    summary:
+      'Markerless world tracking, image target tracking, and real-time 3D overlays for mobile and spatial devices.',
+    tech: ['AR Foundation', 'ARKit', 'ARCore', 'Vuforia', 'Immersal'],
+    projects: ['ar-museum-guide', 'ar-home-designer', 'ar-shooter', 'example-ar-image-tracking'],
+  },
+  {
+    title: 'Virtual Reality (VR)',
+    summary:
+      'Interactive 6DoF environments, physics-driven interactions, and multiplayer VR experiences.',
+    tech: ['Oculus SDK', 'Quest/Vive/HoloLens', 'Unity', 'Unreal Engine'],
+    projects: ['stellar-vr-explorer', 'quantum-warriors', 'rhythm-dimension'],
+  },
+  {
+    title: 'Mixed Reality (MR)',
+    summary:
+      'Passthrough and optical blending workflows uniting physical environments with anchored 3D interfaces.',
+    tech: ['MRTK', 'OpenXR', 'Quest/Vive/HoloLens'],
+    projects: ['ue5-vr-ar-booth'],
+  },
+  {
+    title: 'Android XR & AR Glasses',
+    summary:
+      'Optical see-through spatial apps and UI prototypes for lightweight AR glasses and Android XR.',
+    tech: ['Android XR', 'XREAL SDK', 'OpenXR'],
+    projects: ['xr-sports-viewing', 'android-xr-prototypes'],
+  },
+  {
+    title: 'Spatial Computing',
+    summary:
+      'Ergonomic 3D UI, gaze/hand/controller interactions, and cross-platform spatial architectures.',
+    tech: ['OpenXR', 'Unity', 'Unreal Engine', 'Blueprint'],
+    projects: ['xr-sports-viewing', 'android-xr-prototypes'],
+  },
+  {
+    title: 'AI + XR',
+    summary:
+      'On-device inference and computer-vision tracking pipelines embedded inside real-time 3D engines.',
+    tech: ['Computer Vision', 'ONNX / Unity Inference Engine', 'MediaPipe', 'Python'],
+    projects: ['ai-football-tactical-analysis', 'ai-ar-fitting-room'],
+  },
+  {
+    title: 'Motion Tracking (Kinect)',
+    summary:
+      'Full-body skeletal capture and depth-sensor gameplay mechanics for interactive installations.',
+    tech: ['Kinect/Azure Kinect', 'Unity', 'C#'],
+    projects: ['kinect-red-light-green-light'],
+  },
+  {
+    title: 'Real-Time Medical Simulation',
+    summary:
+      'Clinical AR anatomy visualization and surgical/gynecology training tools built with medical specialists.',
+    tech: ['AR Foundation', 'Unity', 'C#'],
+    projects: ['virtucare-gynecology-ar-sim', 'virtucare-ar-anatomy', 'biolab-vr'],
+  },
+];
+---
+
+<section id="xr" class="section reveal">
+  <div class="container">
+    <div class="section-head">
+      <span class="eyebrow">XR &amp; Innovation</span>
+      <h2 class="section-title">Spatial Capabilities</h2>
+      <p class="section-subtitle">
+        Specialized across head-mounted displays, optical AR glasses, skeletal motion tracking, and real-time computer vision.
+      </p>
+    </div>
+
+    <div class="xr-grid">
+      {
+        capabilities.map((cap) => (
+          <GlassPanel as="article" variant="card" padding="md" interactive>
+            <div class="xr-card-inner">
+              <h3 class="xr-title">{cap.title}</h3>
+              <p class="xr-summary">{cap.summary}</p>
+
+              <div class="xr-tech">
+                {cap.tech.map((item) => <span class="chip">{item}</span>)}
+              </div>
+
+              {cap.projects.length > 0 && (
+                <div class="xr-projects">
+                  {cap.projects.map((slug) => (
+                    <a
+                      class="xr-project-link"
+                      href={`#project-${slug}`}
+                      data-jump-project={slug}
+                    >
+                      {projectTitles.get(slug) ?? slug}
+                    </a>
+                  ))}
+                </div>
+              )}
+            </div>
+          </GlassPanel>
+        ))
+      }
+    </div>
+
+    {
+      enableModelPreview && (
+        <GlassPanel variant="panel" padding="md" class="xr-model-panel">
+          <div class="xr-model-head">
+            <div>
+              <h3 class="xr-title">Interactive 3D Character Preview</h3>
+              <p class="xr-summary">
+                Loads the 4.7 MB GLB asset only on request.
+              </p>
+            </div>
+            <button
+              type="button"
+              class="btn"
+              data-load-glb
+              data-model-src="/models/Luna_anim_V5.glb"
+            >
+              Load 3D Preview
+            </button>
+          </div>
+          <div class="xr-model-stage" data-model-stage hidden />
+        </GlassPanel>
+      )
+    }
+  </div>
+</section>
+
+<style>
+  .xr-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1.15rem;
+  }
+
+  .xr-card-inner {
+    display: grid;
+    gap: 0.75rem;
+    height: 100%;
+    align-content: start;
+  }
+
+  .xr-title {
+    font-size: var(--text-lg);
+    font-weight: 650;
+    letter-spacing: -0.015em;
+  }
+
+  .xr-summary {
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    line-height: 1.55;
+  }
+
+  .xr-tech {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .xr-projects {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    padding-top: 0.55rem;
+    border-top: 1px solid var(--glass-border);
+  }
+
+  .xr-project-link {
+    font-size: var(--text-xs);
+    font-weight: 600;
+    color: var(--accent-blue);
+    text-decoration: none;
+  }
+
+  .xr-project-link:hover {
+    text-decoration: underline;
+  }
+
+  :global(.xr-model-panel) {
+    margin-top: 1.35rem;
+  }
+
+  .xr-model-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .xr-model-stage {
+    margin-top: 1rem;
+    min-height: 360px;
+    border-radius: var(--radius-sm);
+    overflow: hidden;
+  }
+</style>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    const btn = document.querySelector<HTMLButtonElement>('[data-load-glb]');
+    const stage = document.querySelector<HTMLElement>('[data-model-stage]');
+    if (!btn || !stage) return;
+
+    btn.addEventListener(
+      'click',
+      async () => {
+        const src = btn.dataset.modelSrc;
+        if (!src) return;
+        btn.disabled = true;
+        btn.textContent = 'Loading 3D viewer...';
+
+        if (!customElements.get('model-viewer')) {
+          const script = document.createElement('script');
+          script.type = 'module';
+          script.src =
+            'https://ajax.googleapis.com/ajax/libs/model-viewer/4.0.0/model-viewer.min.js';
+          document.head.appendChild(script);
+        }
+
+        const viewer = document.createElement('model-viewer');
+        viewer.setAttribute('src', src);
+        viewer.setAttribute('alt', 'Interactive 3D character preview');
+        viewer.setAttribute('camera-controls', '');
+        viewer.setAttribute('autoplay', '');
+        viewer.style.width = '100%';
+        viewer.style.height = '360px';
+
+        stage.textContent = '';
+        stage.appendChild(viewer);
+        stage.hidden = false;
+        btn.textContent = '3D Preview Loaded';
+      },
+      { once: true }
+    );
+  });
+</script>
