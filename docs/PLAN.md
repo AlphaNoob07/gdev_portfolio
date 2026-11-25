@@ -24,7 +24,7 @@
 | **Existing 6 projects** (`Stellar VR Explorer`, `AR Museum Guide`, `Quantum Warriors`, `AR Home Designer`, `BioLab VR`, `Rhythm Dimension`) | Real. Keep them. Details and media to be supplied. |
 | **Tulip Tech work** (XREAL F1/Football/Rugby XR, PitchVision CV, Android XR demos, Glimmer UI) | Feature generically: no client or product names, no internal details or code, and only screenshots the user approves. |
 | **Stack / hosting** | Astro on Vercel (free Hobby tier). |
-| **Contact-form destination** | `tm.swapon@gmail.com` |
+| **Contact-form destination** | `gdev.swapon@gmail.com` |
 | **AI assistant** | Google Gemini API (user's key), server-side only. |
 | **Privacy** | Email + form only. No phone and no street address on the site or the new resume. Location shows as `Dhaka, Bangladesh`. |
 | **Domain** | `*.vercel.app` for now. The old `onrender.com` URL redirects to it. A custom domain can be added later. |
@@ -78,7 +78,7 @@
 | :--- | :--- | :--- |
 | **Hosting** | Vercel Hobby | Every branch gets a preview URL. One daily cron (Hobby limit). |
 | **Database** | Neon Postgres (via Vercel Marketplace) + Drizzle ORM | Contact submissions, rate-limit counters, chat usage counter, daily analytics snapshots. |
-| **Email** | Resend | Sends from `onboarding@resend.dev` to the Resend account owner (`tm.swapon@gmail.com`). Switch to a custom domain later. |
+| **Email** | Resend | Sends from `onboarding@resend.dev` to the Resend account owner (`gdev.swapon@gmail.com`). Switch to a custom domain later. |
 | **Spam** | Cloudflare Turnstile + honeypot field + minimum fill time | Server-verified protection. |
 | **Analytics** | Umami Cloud (cookieless, no consent banner needed) | Server-side API key. Daily cron saves totals to Neon so all-time numbers survive the retention window. |
 | **AI** | Google Gemini (`@google/genai`) | Model set via `GEMINI_MODEL` env var (current Flash-tier model, confirmed in Google's docs at implementation time). |
@@ -142,7 +142,7 @@ scripts/build-resume-pdf.ts # Playwright prints /resume to public/resume/*.pdf
 ---
 
 ## Functional Features
-- **Contact (`/api/contact`):** inline validation, UUID idempotency key, loading spinner, zod validation, honeypot & min-time checks, Turnstile, salted IP hash rate limit (`5/hr`, `20/day`), Neon deduplication & persistence, Resend email to `tm.swapon@gmail.com`, 12-month cron cleanup.
+- **Contact (`/api/contact`):** inline validation, UUID idempotency key, loading spinner, zod validation, honeypot & min-time checks, Turnstile, salted IP hash rate limit (`5/hr`, `20/day`), Neon deduplication & persistence, Resend email to `gdev.swapon@gmail.com`, 12-month cron cleanup.
 - **Analytics (Umami Cloud + `/api/stats`):** pageviews + custom events (`project_view`, `case_study_open`, `section_view`, `cv_download`, `contact_submit`, `assistant_open`); cached totals (5 min) & active visitors (60s); `"Stats unavailable"` on failure.
 - **Admin Dashboard (`/admin`):** middleware-guarded, GitHub OAuth restricted to `AlphaNoob07`, `401` on `/api/admin/*` without session + origin check on POST, `noindex` / `X-Robots-Tag`, excluded from sitemap.
 - **GitHub (`/api/github`):** `GITHUB_TOKEN`, REST public repos (`private:false`, forks hidden by default), public events, GraphQL `contributionsCollection`, curated repos first, `s-maxage=3600, stale-while-revalidate=86400`, build-time fallback snapshot.
@@ -160,7 +160,7 @@ scripts/build-resume-pdf.ts # Playwright prints /resume to public/resume/*.pdf
 - Approved screenshots for Tulip Tech and VirtuCare.
 - Approval & authorship confirmation for `Luna_anim_V5.glb`.
 - Availability status and engagement types.
-- Accounts to set up: Vercel, Neon (via Vercel), Resend (`tm.swapon@gmail.com`), Cloudflare Turnstile, Umami Cloud, Google AI Studio (Gemini key), GitHub OAuth App + Keystatic GitHub App.
+- Accounts to set up: Vercel, Neon (via Vercel), Resend (`gdev.swapon@gmail.com`), Cloudflare Turnstile, Umami Cloud, Google AI Studio (Gemini key), GitHub OAuth App + Keystatic GitHub App.
 
 ---
 

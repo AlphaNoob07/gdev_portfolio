@@ -90,7 +90,7 @@ const creativeWorkJsonLd: Record<string, unknown> = {
 const hasHeroMedia = Boolean(posterAsset || data.previewVideo);
 const hasOverview = Boolean(data.caseStudy?.overview);
 const hasObjectives = Boolean(data.caseStudy?.objectives?.length);
-const hasRoleContext = Boolean(data.role || data.organization || data.year);
+const hasRoleContext = Boolean(data.role || data.year);
 const hasChallenges = Boolean(data.caseStudy?.challenges?.length);
 const hasSolutions = Boolean(data.caseStudy?.solutions?.length);
 const hasOutcomes = Boolean(data.caseStudy?.outcomes?.length);
@@ -271,12 +271,6 @@ const hasOutcomes = Boolean(data.caseStudy?.outcomes?.length);
                     <div>
                       <dt>Role</dt>
                       <dd>{data.role}</dd>
-                    </div>
-                  )}
-                  {data.organization && (
-                    <div>
-                      <dt>Organization</dt>
-                      <dd>{data.organization}</dd>
                     </div>
                   )}
                   {data.year && (

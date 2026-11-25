@@ -22,10 +22,10 @@ Set these in **Vercel → Project Settings → Environment Variables** (never co
    ```
 
 ### C. Contact Email (Resend)
-1. Create a Resend account using **`tm.swapon@gmail.com`** (required for `onboarding@resend.dev` delivery until a custom domain is verified).
+1. Create a Resend account using **`gdev.swapon@gmail.com`** (required for `onboarding@resend.dev` delivery until a custom domain is verified).
 2. Create an API key and set:
    - `RESEND_API_KEY=<your-resend-key>`
-   - `CONTACT_TO=tm.swapon@gmail.com`
+   - `CONTACT_TO=gdev.swapon@gmail.com`
 
 ### D. Spam Protection (Cloudflare Turnstile)
 1. In Cloudflare Dashboard → **Turnstile → Add Widget**.

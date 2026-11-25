@@ -29,7 +29,7 @@ function formatDate(iso: string): string {
         <span class="eyebrow">Open Source &amp; Activity</span>
         <h2 class="section-title">GitHub Showcase</h2>
         <p class="section-subtitle">
-          Public repositories, curated XR/Unity samples, and recent engineering activity from @{profile.githubUsername}.
+          Public repositories and curated XR/Unity samples from @{profile.githubUsername}.
         </p>
       </div>
 
@@ -92,59 +92,35 @@ function formatDate(iso: string): string {
       }
     </div>
 
-    <div class="gh-secondary-grid">
-      <GlassPanel
-        variant="panel"
-        padding="md"
-        class={`gh-calendar-panel${initialData.contributions ? '' : ' is-empty'}`}
-      >
-        <div class="gh-panel-head">
-          <h3 class="gh-panel-title">Contribution Calendar</h3>
-          <span class="gh-panel-meta" data-github-contrib-total>
-            {initialData.contributions
-              ? `${initialData.contributions.total} contributions in the last year`
-              : ''}
-          </span>
-        </div>
-        <div class="gh-calendar-grid" data-github-calendar>
-          {
-            initialData.contributions?.weeks.map((week) => (
-              <div class="gh-week">
-                {week.days.map((day) => (
-                  <span
-                    class="gh-day"
-                    data-level={day.level}
-                    title={`${day.date}: ${day.count} contributions`}
-                  />
-                ))}
-              </div>
-            ))
-          }
-        </div>
-      </GlassPanel>
-
-      <GlassPanel
-        variant="panel"
-        padding="md"
-        class={`gh-activity-panel${initialData.activity.length > 0 ? '' : ' is-empty'}`}
-      >
-        <div class="gh-panel-head">
-          <h3 class="gh-panel-title">Recent Public Activity</h3>
-        </div>
-        <ul class="gh-activity-list" data-github-activity>
-          {
-            initialData.activity.slice(0, 6).map((item) => (
-              <li class="gh-activity-item">
-                <a href={item.repoUrl} target="_blank" rel="noopener">
-                  {item.summary}
-                </a>
-                <span>{formatDate(item.createdAt)}</span>
-              </li>
-            ))
-          }
-        </ul>
-      </GlassPanel>
-    </div>
+    <GlassPanel
+      variant="panel"
+      padding="md"
+      class={`gh-calendar-panel${initialData.contributions ? '' : ' is-empty'}`}
+    >
+      <div class="gh-panel-head">
+        <h3 class="gh-panel-title">Contribution Calendar</h3>
+        <span class="gh-panel-meta" data-github-contrib-total>
+          {initialData.contributions
+            ? `${initialData.contributions.total} contributions in the last year`
+            : ''}
+        </span>
+      </div>
+      <div class="gh-calendar-grid" data-github-calendar>
+        {
+          initialData.contributions?.weeks.map((week) => (
+            <div class="gh-week">
+              {week.days.map((day) => (
+                <span
+                  class="gh-day"
+                  data-level={day.level}
+                  title={`${day.date}: ${day.count} contributions`}
+                />
+              ))}
+            </div>
+          ))
+        }
+      </div>
+    </GlassPanel>
   </div>
 </section>
 
@@ -229,15 +205,11 @@ function formatDate(iso: string): string {
     margin-left: auto;
   }
 
-  .gh-secondary-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
-    gap: 1.15rem;
+  :global(.gh-calendar-panel) {
     margin-top: 1.25rem;
   }
 
-  :global(.gh-calendar-panel.is-empty),
-  :global(.gh-activity-panel.is-empty) {
+  :global(.gh-calendar-panel.is-empty) {
     display: none;
   }
 
@@ -296,44 +268,6 @@ function formatDate(iso: string): string {
   .gh-day[data-level='4'] {
     background: var(--accent-blue);
   }
-
-  .gh-activity-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-    display: grid;
-    gap: 0.55rem;
-  }
-
-  .gh-activity-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    gap: 0.75rem;
-    font-size: var(--text-sm);
-    padding-bottom: 0.5rem;
-    border-bottom: 1px solid var(--glass-border);
-  }
-
-  .gh-activity-item:last-child {
-    border-bottom: none;
-    padding-bottom: 0;
-  }
-
-  .gh-activity-item a {
-    color: var(--text-secondary);
-    text-decoration: none;
-  }
-
-  .gh-activity-item a:hover {
-    color: var(--text-primary);
-  }
-
-  .gh-activity-item span {
-    font-size: var(--text-xs);
-    color: var(--text-muted);
-    white-space: nowrap;
-  }
 </style>
 
 <script>
@@ -348,12 +282,6 @@ function formatDate(iso: string): string {
     curated: boolean;
   }
 
-  interface LiveActivity {
-    repoUrl: string;
-    summary: string;
-    createdAt: string;
-  }
-
   interface LiveContributions {
     total: number;
     weeks: Array<{
@@ -364,7 +292,6 @@ function formatDate(iso: string): string {
   interface LivePayload {
     source: 'live' | 'snapshot';
     repos: LiveRepo[];
-    activity: LiveActivity[];
     contributions: LiveContributions | null;
   }
 
@@ -393,8 +320,6 @@ function formatDate(iso: string): string {
     const calendarPanel = section.querySelector<HTMLElement>('.gh-calendar-panel');
     const calendarGrid = section.querySelector<HTMLElement>('[data-github-calendar]');
     const contribTotal = section.querySelector<HTMLElement>('[data-github-contrib-total]');
-    const activityPanel = section.querySelector<HTMLElement>('.gh-activity-panel');
-    const activityList = section.querySelector<HTMLElement>('[data-github-activity]');
 
     fetch('/api/github', { signal })
       .then((res) => (res.ok ? (res.json() as Promise<LivePayload>) : null))
@@ -492,25 +417,6 @@ function formatDate(iso: string): string {
               weekEl.appendChild(dayEl);
             });
             calendarGrid.appendChild(weekEl);
-          });
-        }
-
-        if (activityList && activityPanel && Array.isArray(data.activity) && data.activity.length > 0) {
-          activityPanel.classList.remove('is-empty');
-          activityList.textContent = '';
-          data.activity.slice(0, 6).forEach((item) => {
-            const li = document.createElement('li');
-            li.className = 'gh-activity-item';
-            const a = document.createElement('a');
-            a.href = item.repoUrl;
-            a.target = '_blank';
-            a.rel = 'noopener';
-            a.textContent = item.summary;
-            const dateSpan = document.createElement('span');
-            dateSpan.textContent = formatShortDate(item.createdAt);
-            li.appendChild(a);
-            li.appendChild(dateSpan);
-            activityList.appendChild(li);
           });
         }
       })

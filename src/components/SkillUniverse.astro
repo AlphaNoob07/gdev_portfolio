@@ -5,10 +5,9 @@ import type { SkillConstellation, SkillsData } from '../lib/content';
 interface Props {
   skills: SkillsData;
   constellation: SkillConstellation;
-  projectTitles: Map<string, string>;
 }
 
-const { skills, constellation, projectTitles } = Astro.props;
+const { skills, constellation } = Astro.props;
 
 type CategoryId = SkillsData['categories'][number]['id'];
 
@@ -124,10 +123,6 @@ const clientPayload = {
     name: n.name,
     categoryLabel: n.categoryLabel,
     sourceLabel: n.sourceLabel,
-    projects: n.projectIds.map((id) => ({
-      id,
-      title: projectTitles.get(id) ?? id,
-    })),
     connectedSkills: constellation.edges
       .filter((e) => e.from === n.name || e.to === n.name)
       .map((e) => (e.from === n.name ? e.to : e.from)),
@@ -310,31 +305,6 @@ const clientPayload = {
           <h3 class="inspector-title" data-inspector-title>
             {defaultSkill?.name}
           </h3>
-
-          <div class="inspector-block">
-            <h4 class="inspector-subhead">Related Projects</h4>
-            <ul class="inspector-projects" data-inspector-projects>
-              {
-                defaultSkill && defaultSkill.projectIds.length > 0 ? (
-                  defaultSkill.projectIds.map((slug) => (
-                    <li>
-                      <a
-                        class="inspector-project-link"
-                        href={`#project-${slug}`}
-                        data-jump-project={slug}
-                      >
-                        {projectTitles.get(slug) ?? slug}
-                      </a>
-                    </li>
-                  ))
-                ) : (
-                  <li class="inspector-empty">
-                    Verified in profile sources; no public project linked yet.
-                  </li>
-                )
-              }
-            </ul>
-          </div>
 
           <div class="inspector-block">
             <h4 class="inspector-subhead">Used Alongside</h4>
@@ -601,33 +571,6 @@ const clientPayload = {
     margin: 0;
   }
 
-  .inspector-projects {
-    list-style: none;
-    padding: 0;
-    display: grid;
-    gap: 0.45rem;
-  }
-
-  .inspector-project-link {
-    display: inline-flex;
-    align-items: center;
-    width: 100%;
-    padding: 0.52rem 0.8rem;
-    border-radius: var(--radius-sm);
-    background: var(--glass-pill-bg);
-    border: 1px solid var(--glass-border);
-    text-decoration: none;
-    font-size: var(--text-sm);
-    font-weight: 500;
-    color: var(--text-primary);
-    transition: background-color var(--duration-fast) ease, border-color var(--duration-fast) ease;
-  }
-
-  .inspector-project-link:hover {
-    background: var(--glass-pill-hover);
-    border-color: var(--glass-border-strong);
-  }
-
   .inspector-empty {
     font-size: var(--text-sm);
     color: var(--text-secondary);
@@ -665,7 +608,6 @@ const clientPayload = {
     name: string;
     categoryLabel: string;
     sourceLabel: string;
-    projects: Array<{ id: string; title: string }>;
     connectedSkills: string[];
   }
 
@@ -708,7 +650,6 @@ const clientPayload = {
     const categoryEl = root.querySelector<HTMLElement>('[data-inspector-category]');
     const sourceEl = root.querySelector<HTMLElement>('[data-inspector-source]');
     const titleEl = root.querySelector<HTMLElement>('[data-inspector-title]');
-    const projectsEl = root.querySelector<HTMLElement>('[data-inspector-projects]');
     const coSkillsEl = root.querySelector<HTMLElement>('[data-inspector-coskills]');
 
     const constellationView = root.querySelector<HTMLElement>('[data-constellation-view]');
@@ -751,27 +692,6 @@ const clientPayload = {
       if (categoryEl) categoryEl.textContent = record.categoryLabel;
       if (sourceEl) sourceEl.textContent = record.sourceLabel;
       if (titleEl) titleEl.textContent = record.name;
-
-      if (projectsEl) {
-        projectsEl.textContent = '';
-        if (record.projects.length === 0) {
-          const li = document.createElement('li');
-          li.className = 'inspector-empty';
-          li.textContent = 'Verified in profile sources; no public project linked yet.';
-          projectsEl.appendChild(li);
-        } else {
-          record.projects.forEach((proj) => {
-            const li = document.createElement('li');
-            const a = document.createElement('a');
-            a.className = 'inspector-project-link';
-            a.href = `#project-${proj.id}`;
-            a.dataset.jumpProject = proj.id;
-            a.textContent = proj.title;
-            li.appendChild(a);
-            projectsEl.appendChild(li);
-          });
-        }
-      }
 
       if (coSkillsEl) {
         coSkillsEl.textContent = '';

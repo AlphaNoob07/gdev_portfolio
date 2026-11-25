@@ -2,7 +2,7 @@
 import { Image } from 'astro:assets';
 import GlassPanel from './GlassPanel.astro';
 import AvailabilityBadge from './AvailabilityBadge.astro';
-import profilePic from '../assets/profile_pic.png';
+import profilePic from '../assets/profile_pic.jpg';
 import type { AvailabilityData, ProfileData } from '../lib/content';
 
 interface Props {
@@ -91,7 +91,6 @@ const focusDisciplines = [
                 src={profilePic}
                 alt={profile.fullName}
                 width={320}
-                height={320}
                 loading="eager"
                 fetchpriority="high"
                 class="hero-avatar"
@@ -228,6 +227,7 @@ const focusDisciplines = [
     height: 156px;
     border-radius: 9999px;
     object-fit: cover;
+    object-position: center 20%;
     background: var(--bg-base);
   }
 

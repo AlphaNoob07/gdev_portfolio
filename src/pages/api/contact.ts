@@ -91,7 +91,7 @@ export const POST: APIRoute = async ({ request }) => {
     return jsonResponse(
       {
         error:
-          'Too many contact submissions this hour. Please try again later or email tm.swapon@gmail.com.',
+          'Too many contact submissions this hour. Please try again later or email gdev.swapon@gmail.com.',
       },
       429,
       { 'Retry-After': String(hourly.retryAfterSeconds) }
@@ -107,7 +107,7 @@ export const POST: APIRoute = async ({ request }) => {
     return jsonResponse(
       {
         error:
-          'Daily contact submission limit reached. Please try again tomorrow or email tm.swapon@gmail.com.',
+          'Daily contact submission limit reached. Please try again tomorrow or email gdev.swapon@gmail.com.',
       },
       429,
       { 'Retry-After': String(daily.retryAfterSeconds) }
@@ -182,7 +182,7 @@ export const POST: APIRoute = async ({ request }) => {
   }
 
   const resendKey = process.env.RESEND_API_KEY?.trim();
-  const recipient = process.env.CONTACT_TO?.trim() || 'tm.swapon@gmail.com';
+  const recipient = process.env.CONTACT_TO?.trim() || 'gdev.swapon@gmail.com';
 
   if (!resendKey) {
     if (db && insertedId !== null) {
@@ -194,7 +194,7 @@ export const POST: APIRoute = async ({ request }) => {
     return jsonResponse(
       {
         error:
-          'Email delivery is not configured yet. Please email tm.swapon@gmail.com directly.',
+          'Email delivery is not configured yet. Please email gdev.swapon@gmail.com directly.',
       },
       503
     );
@@ -226,7 +226,7 @@ export const POST: APIRoute = async ({ request }) => {
     return jsonResponse(
       {
         error:
-          'Could not deliver email right now. Please try again or email tm.swapon@gmail.com.',
+          'Could not deliver email right now. Please try again or email gdev.swapon@gmail.com.',
       },
       502
     );

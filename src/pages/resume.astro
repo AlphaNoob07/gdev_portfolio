@@ -136,9 +136,6 @@ const featuredProjects = projects.filter((p) => p.data.featured).slice(0, 6);
                 <article class="resume-proj-item">
                   <div class="resume-proj-head">
                     <h3>{proj.data.title}</h3>
-                    {proj.data.organization && (
-                      <span>{proj.data.organization}</span>
-                    )}
                   </div>
                   <p>{proj.data.summary}</p>
                   <p class="resume-tech-line">{proj.data.tech.join(' · ')}</p>

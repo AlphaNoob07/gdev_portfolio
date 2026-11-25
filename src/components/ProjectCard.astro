@@ -84,14 +84,11 @@ const caseStudyHref = `/projects/${project.id}`;
     </a>
 
     <div class="project-body">
-      <div class="project-meta-row">
-        {data.organization && (
-          <span class="project-org">{data.organization}</span>
-        )}
-        {data.confidentiality === 'generic-only' && (
+      {data.confidentiality === 'generic-only' && (
+        <div class="project-meta-row">
           <span class="chip project-confidential">Generic overview</span>
-        )}
-      </div>
+        </div>
+      )}
 
       <h3 class="project-title">
         <a
@@ -255,14 +252,6 @@ const caseStudyHref = `/projects/${project.id}`;
     justify-content: space-between;
     gap: 0.5rem;
     min-height: 1.25rem;
-  }
-
-  .project-org {
-    font-size: var(--text-xs);
-    font-weight: 600;
-    color: var(--accent-blue);
-    text-transform: uppercase;
-    letter-spacing: 0.06em;
   }
 
   .project-confidential {

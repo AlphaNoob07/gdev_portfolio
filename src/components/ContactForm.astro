@@ -448,7 +448,7 @@ const turnstileSiteKey =
         statusEl.append(' ');
         const link = document.createElement('a');
         link.href = mailtoHref;
-        link.textContent = 'Email tm.swapon@gmail.com';
+        link.textContent = 'Email gdev.swapon@gmail.com';
         link.style.color = 'var(--accent-blue)';
         link.style.fontWeight = '600';
         statusEl.appendChild(link);
@@ -549,7 +549,7 @@ const turnstileSiteKey =
           if (!response.ok) {
             const mailto =
               response.status === 503
-                ? `mailto:tm.swapon@gmail.com?subject=${encodeURIComponent(
+                ? `mailto:gdev.swapon@gmail.com?subject=${encodeURIComponent(
                     payload.subject || `Portfolio Inquiry from ${payload.name}`
                   )}&body=${encodeURIComponent(`${payload.message}\n\nFrom: ${payload.name} (${payload.email})`)}`
                 : undefined;
@@ -587,7 +587,7 @@ const turnstileSiteKey =
         } catch {
           showStatus(
             'error',
-            'Network error while sending. Please check your connection or email tm.swapon@gmail.com.'
+            'Network error while sending. Please check your connection or email gdev.swapon@gmail.com.'
           );
         } finally {
           if (submitBtn) submitBtn.disabled = false;
