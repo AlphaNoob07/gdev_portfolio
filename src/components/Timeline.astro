@@ -58,34 +58,40 @@ const { entries, projectTitles } = Astro.props;
                 <p class="timeline-summary">{entry.data.summary}</p>
               )}
 
-              <ul class="timeline-points">
-                {entry.data.responsibilities.map((point) => (
-                  <li>{point}</li>
-                ))}
-              </ul>
-
-              <div class="timeline-footer">
-                <div class="timeline-chips" aria-label="Technologies used">
-                  {entry.data.tech.map((item) => (
-                    <span class="chip">{item}</span>
+              {entry.data.responsibilities.length > 0 && (
+                <ul class="timeline-points">
+                  {entry.data.responsibilities.map((point) => (
+                    <li>{point}</li>
                   ))}
-                </div>
+                </ul>
+              )}
 
-                {entry.data.relatedProjects.length > 0 && (
-                  <div class="timeline-projects" aria-label="Related projects">
-                    <span class="timeline-projects-label">Related:</span>
-                    {entry.data.relatedProjects.map((slug) => (
-                      <a
-                        class="chip timeline-project-link"
-                        href={`#project-${slug}`}
-                        data-jump-project={slug}
-                      >
-                        {projectTitles.get(slug) ?? slug}
-                      </a>
-                    ))}
-                  </div>
-                )}
-              </div>
+              {(entry.data.tech.length > 0 || entry.data.relatedProjects.length > 0) && (
+                <div class="timeline-footer">
+                  {entry.data.tech.length > 0 && (
+                    <div class="timeline-chips" aria-label="Technologies used">
+                      {entry.data.tech.map((item) => (
+                        <span class="chip">{item}</span>
+                      ))}
+                    </div>
+                  )}
+
+                  {entry.data.relatedProjects.length > 0 && (
+                    <div class="timeline-projects" aria-label="Related projects">
+                      <span class="timeline-projects-label">Related:</span>
+                      {entry.data.relatedProjects.map((slug) => (
+                        <a
+                          class="chip timeline-project-link"
+                          href={`#project-${slug}`}
+                          data-jump-project={slug}
+                        >
+                          {projectTitles.get(slug) ?? slug}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </GlassPanel>
           </li>
         ))

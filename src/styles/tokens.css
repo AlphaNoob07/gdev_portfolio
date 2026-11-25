@@ -13,7 +13,7 @@
     'Segoe UI', sans-serif;
   --text-primary: #f5f7fb;
   --text-secondary: #b6c0d4;
-  --text-muted: #8f9bb3;
+  --text-muted: #9ca8bf;
   --text-on-accent: #ffffff;
 
   /* Fluid Type Scale */
@@ -94,7 +94,7 @@
   --text-on-accent: #ffffff;
 
   /* Accents */
-  --accent-blue: #2563eb;
+  --accent-blue: #1d4ed8;
   --accent-violet: #6366f1;
   --accent-strong: #1d4ed8;
   --accent-gradient: linear-gradient(135deg, #2563eb 0%, #6366f1 100%);

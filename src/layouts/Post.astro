@@ -1,0 +1,139 @@
+---
+import Base from './Base.astro';
+import GlassPanel from '../components/GlassPanel.astro';
+import { getProfile, type BlogEntry } from '../lib/content';
+
+interface Props {
+  post: BlogEntry;
+}
+
+const { post } = Astro.props;
+const profile = await getProfile();
+const { data } = post;
+
+const words = (post.body || '').trim().split(/\s+/).filter(Boolean).length;
+const readingMinutes = Math.max(1, Math.ceil(words / 200));
+
+const publishedLabel = new Intl.DateTimeFormat('en-US', {
+  month: 'long',
+  day: 'numeric',
+  year: 'numeric',
+}).format(data.publishedAt);
+
+const updatedLabel = data.updatedAt
+  ? new Intl.DateTimeFormat('en-US', {
+      month: 'long',
+      day: 'numeric',
+      year: 'numeric',
+    }).format(data.updatedAt)
+  : null;
+
+const blogJsonLd: Record<string, unknown> = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: data.title,
+  description: data.description,
+  datePublished: data.publishedAt.toISOString(),
+  ...(data.updatedAt ? { dateModified: data.updatedAt.toISOString() } : {}),
+  author: {
+    '@type': 'Person',
+    name: profile.name,
+  },
+  keywords: data.tags,
+};
+---
+
+<Base
+  title={`${data.title} — ${profile.name}`}
+  description={data.description}
+  ogType="article"
+  jsonLd={blogJsonLd}
+>
+  <article class="section post-page">
+    <div class="container post-container">
+      <nav class="post-breadcrumb" aria-label="Breadcrumb">
+        <a href="/blog" class="chip post-back">&larr; All Articles</a>
+      </nav>
+
+      <GlassPanel variant="panel" padding="lg" class="post-header">
+        <div class="post-meta">
+          <span class="chip">{publishedLabel}</span>
+          <span class="chip">{readingMinutes} min read</span>
+          {updatedLabel && <span class="chip">Updated {updatedLabel}</span>}
+        </div>
+        <h1 class="post-title">{data.title}</h1>
+        <p class="post-desc">{data.description}</p>
+        {
+          data.tags.length > 0 && (
+            <div class="post-tags">
+              {data.tags.map((tag) => <span class="chip">{tag}</span>)}
+            </div>
+          )
+        }
+      </GlassPanel>
+
+      <GlassPanel variant="panel" padding="lg" class="post-body">
+        <slot />
+      </GlassPanel>
+    </div>
+  </article>
+</Base>
+
+<style>
+  .post-page {
+    padding-top: clamp(1.5rem, 3.5vw, 3rem);
+  }
+
+  .post-container {
+    width: min(820px, calc(100% - 2rem));
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .post-back {
+    text-decoration: none;
+    color: var(--text-primary);
+  }
+
+  .post-back:hover {
+    background: var(--glass-pill-hover);
+    border-color: var(--glass-border-strong);
+  }
+
+  :global(.post-header) {
+    display: grid;
+    gap: 0.95rem;
+  }
+
+  .post-meta,
+  .post-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  .post-title {
+    font-size: var(--text-2xl);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    line-height: 1.12;
+  }
+
+  .post-desc {
+    font-size: var(--text-lg);
+    color: var(--text-secondary);
+  }
+
+  :global(.post-body) {
+    display: grid;
+    gap: 1rem;
+    color: var(--text-secondary);
+    line-height: 1.75;
+  }
+
+  :global(.post-body h2),
+  :global(.post-body h3) {
+    color: var(--text-primary);
+    margin-top: 0.75rem;
+  }
+</style>

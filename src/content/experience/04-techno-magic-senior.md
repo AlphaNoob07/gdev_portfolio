@@ -2,9 +2,9 @@
 order: 4
 company: "Techno Magic Pvt. Ltd."
 role: "Senior Unity Game Developer"
-period: "Jan 2021 – Oct 2023"
-startDate: "2021-01"
-endDate: "2023-10"
+period: "Dec 2021 – Nov 2023"
+startDate: "2021-12"
+endDate: "2023-11"
 current: false
 needsConfirmation: false
 location: "Dhaka, Bangladesh"

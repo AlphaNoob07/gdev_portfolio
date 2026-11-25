@@ -2,11 +2,12 @@
 order: 2
 company: "VirtuCareBD.AI"
 companyNote: "Sister concern of LABAID Cancer Hospital & Super Speciality Centre"
-role: "AR/VR Developer [Programmer]"
-period: "Dec 2024 – Present?"
+role: "AR/VR Developer (Programmer)"
+period: "Dec 2024 – Feb 2026"
 startDate: "2024-12"
-current: true
-needsConfirmation: true
+endDate: "2026-02"
+current: false
+needsConfirmation: false
 location: "Dhaka, Bangladesh"
 responsibilities:
   - "Developing AR-based anatomy and surgical simulation applications."

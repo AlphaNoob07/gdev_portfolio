@@ -1,0 +1,485 @@
+---
+import Base from '../layouts/Base.astro';
+import GlassPanel from '../components/GlassPanel.astro';
+import {
+  getCertifications,
+  getExperience,
+  getProfile,
+  getProjects,
+  getSkills,
+} from '../lib/content';
+
+const [profile, experience, skills, projects, certifications] =
+  await Promise.all([
+    getProfile(),
+    getExperience(),
+    getSkills(),
+    getProjects(),
+    getCertifications(),
+  ]);
+
+const featuredProjects = projects.filter((p) => p.data.featured).slice(0, 6);
+---
+
+<Base
+  title={`Resume — ${profile.fullName}`}
+  description={`A4 printable resume for ${profile.fullName} — ${profile.intro}`}
+>
+  <section class="section resume-section-page">
+    <div class="container resume-container">
+      <div class="resume-toolbar no-print">
+        <a href="/" class="btn">&larr; Back to Portfolio</a>
+        <div class="resume-toolbar-actions">
+          <a
+            href="/resume/Swapon-Islam-Resume.pdf"
+            class="btn btn-primary"
+            download="Swapon-Islam-Resume.pdf"
+            data-umami-event="cv_download"
+          >
+            Download A4 PDF
+          </a>
+          <button type="button" class="btn" data-print-resume>
+            Print / Save PDF
+          </button>
+        </div>
+      </div>
+
+      <GlassPanel variant="panel" padding="lg" class="resume-sheet">
+        <header class="resume-header">
+          <div>
+            <h1 class="resume-name">{profile.fullName}</h1>
+            <p class="resume-headline">{profile.intro}</p>
+          </div>
+          <ul class="resume-meta" aria-label="Contact links">
+            <li>{profile.location}</li>
+            <li>
+              <a href={`mailto:${profile.email}`}>{profile.email}</a>
+            </li>
+            <li>
+              <a href={profile.links.github} target="_blank" rel="noopener">
+                github.com/{profile.githubUsername}
+              </a>
+            </li>
+            <li>
+              <a href={profile.links.linkedin} target="_blank" rel="noopener">
+                linkedin.com/in/swapon-islam-57a55111b
+              </a>
+            </li>
+          </ul>
+        </header>
+
+        <section class="resume-block" aria-labelledby="resume-summary">
+          <h2 id="resume-summary" class="resume-heading">Summary</h2>
+          <div class="resume-prose">
+            {profile.about.map((para) => <p>{para}</p>)}
+          </div>
+        </section>
+
+        <section class="resume-block" aria-labelledby="resume-experience">
+          <h2 id="resume-experience" class="resume-heading">Experience</h2>
+          <div class="resume-entries">
+            {
+              experience.map((exp) => (
+                <article class="resume-entry">
+                  <div class="resume-entry-head">
+                    <div>
+                      <h3 class="resume-role">{exp.data.role}</h3>
+                      <p class="resume-company">
+                        {exp.data.company}
+                        {exp.data.companyNote ? ` — ${exp.data.companyNote}` : ''}
+                      </p>
+                    </div>
+                    <div class="resume-entry-meta">
+                      <span class="resume-period">{exp.data.period}</span>
+                      <span class="resume-loc">{exp.data.location}</span>
+                    </div>
+                  </div>
+
+                  {exp.data.responsibilities.length > 0 && (
+                    <ul class="resume-bullets">
+                      {exp.data.responsibilities.map((item) => (
+                        <li>{item}</li>
+                      ))}
+                    </ul>
+                  )}
+
+                  {exp.data.tech.length > 0 && (
+                    <p class="resume-tech-line">
+                      <strong>Tech:</strong> {exp.data.tech.join(', ')}
+                    </p>
+                  )}
+                </article>
+              ))
+            }
+          </div>
+        </section>
+
+        <section class="resume-block" aria-labelledby="resume-skills">
+          <h2 id="resume-skills" class="resume-heading">Technical Skills</h2>
+          <div class="resume-skills-list">
+            {
+              skills.categories.map((cat) => (
+                <div class="resume-skill-row">
+                  <strong>{cat.label}:</strong>{' '}
+                  <span>{cat.skills.map((s) => s.name).join(', ')}</span>
+                </div>
+              ))
+            }
+          </div>
+        </section>
+
+        <section class="resume-block" aria-labelledby="resume-projects">
+          <h2 id="resume-projects" class="resume-heading">Selected Projects</h2>
+          <div class="resume-projects-grid">
+            {
+              featuredProjects.map((proj) => (
+                <article class="resume-proj-item">
+                  <div class="resume-proj-head">
+                    <h3>{proj.data.title}</h3>
+                    {proj.data.organization && (
+                      <span>{proj.data.organization}</span>
+                    )}
+                  </div>
+                  <p>{proj.data.summary}</p>
+                  <p class="resume-tech-line">{proj.data.tech.join(' · ')}</p>
+                </article>
+              ))
+            }
+          </div>
+        </section>
+
+        <div class="resume-two-col">
+          <section class="resume-block" aria-labelledby="resume-education">
+            <h2 id="resume-education" class="resume-heading">Education</h2>
+            <ul class="resume-edu-list">
+              {
+                profile.education.map((edu) => (
+                  <li class="resume-edu-item">
+                    <strong>{edu.degree}</strong>
+                    <span>{edu.institution}</span>
+                    <span class="resume-edu-period">
+                      {edu.period} · {edu.location}
+                    </span>
+                  </li>
+                ))
+              }
+            </ul>
+          </section>
+
+          <section class="resume-block" aria-labelledby="resume-expertise">
+            <h2 id="resume-expertise" class="resume-heading">Core Strengths</h2>
+            <p class="resume-prose">{profile.expertise.join(' · ')}</p>
+
+            {
+              certifications.length > 0 && (
+                <div class="resume-certs">
+                  <h2 class="resume-heading">Certifications</h2>
+                  <ul class="resume-bullets">
+                    {certifications.map((cert) => (
+                      <li>
+                        {cert.data.name} — {cert.data.authority}
+                        {cert.data.issuedAt ? ` (${cert.data.issuedAt})` : ''}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )
+            }
+          </section>
+        </div>
+      </GlassPanel>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .resume-section-page {
+    padding-block: clamp(1.25rem, 3vw, 2.5rem) var(--space-section);
+  }
+
+  .resume-container {
+    width: min(880px, calc(100% - 2rem));
+  }
+
+  .resume-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .resume-toolbar-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+  }
+
+  :global(.resume-sheet) {
+    display: grid;
+    gap: 1.35rem;
+  }
+
+  .resume-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+    padding-bottom: 1rem;
+    border-bottom: 1px solid var(--glass-border-strong);
+  }
+
+  .resume-name {
+    font-size: clamp(1.75rem, 3vw, 2.2rem);
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    line-height: 1.1;
+  }
+
+  .resume-headline {
+    margin-top: 0.35rem;
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    max-width: 52ch;
+  }
+
+  .resume-meta {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.2rem;
+    font-size: var(--text-xs);
+    color: var(--text-secondary);
+    text-align: right;
+  }
+
+  .resume-meta a {
+    text-decoration: none;
+    color: var(--accent-blue);
+  }
+
+  .resume-meta a:hover {
+    text-decoration: underline;
+  }
+
+  .resume-block {
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .resume-heading {
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-blue);
+    border-bottom: 1px solid var(--glass-border);
+    padding-bottom: 0.25rem;
+  }
+
+  .resume-prose {
+    display: grid;
+    gap: 0.45rem;
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+
+  .resume-entries {
+    display: grid;
+    gap: 0.9rem;
+  }
+
+  .resume-entry {
+    display: grid;
+    gap: 0.32rem;
+  }
+
+  .resume-entry-head {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+
+  .resume-role {
+    font-size: var(--text-base);
+    font-weight: 650;
+  }
+
+  .resume-company {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    font-weight: 500;
+  }
+
+  .resume-entry-meta {
+    display: grid;
+    justify-items: end;
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+  }
+
+  .resume-period {
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .resume-bullets {
+    margin: 0.1rem 0 0;
+    padding-left: 1.15rem;
+    display: grid;
+    gap: 0.25rem;
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+
+  .resume-tech-line {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+  }
+
+  .resume-skills-list {
+    display: grid;
+    gap: 0.35rem;
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+
+  .resume-skills-list strong {
+    color: var(--text-primary);
+  }
+
+  .resume-projects-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.75rem 1.25rem;
+  }
+
+  .resume-proj-item {
+    display: grid;
+    gap: 0.2rem;
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+
+  .resume-proj-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 0.5rem;
+  }
+
+  .resume-proj-head h3 {
+    font-size: var(--text-sm);
+    font-weight: 650;
+    color: var(--text-primary);
+    margin: 0;
+  }
+
+  .resume-proj-head span {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+  }
+
+  .resume-two-col {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 1.25rem;
+    align-items: start;
+  }
+
+  .resume-edu-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    gap: 0.55rem;
+  }
+
+  .resume-edu-item {
+    display: grid;
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+
+  .resume-edu-item strong {
+    color: var(--text-primary);
+  }
+
+  .resume-edu-period {
+    font-size: var(--text-xs);
+    color: var(--text-muted);
+  }
+
+  .resume-certs {
+    margin-top: 0.9rem;
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  @media (max-width: 700px) {
+    .resume-meta {
+      text-align: left;
+    }
+
+    .resume-entry-meta {
+      justify-items: start;
+    }
+
+    .resume-projects-grid,
+    .resume-two-col {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media print {
+    .resume-header {
+      border-bottom-color: #94a3b8 !important;
+      padding-bottom: 8pt;
+    }
+
+    .resume-heading {
+      color: #1d4ed8 !important;
+      border-bottom-color: #cbd5e1 !important;
+    }
+
+    .resume-headline,
+    .resume-meta,
+    .resume-prose,
+    .resume-company,
+    .resume-bullets,
+    .resume-skills-list,
+    .resume-proj-item,
+    .resume-edu-item {
+      color: #334155 !important;
+    }
+
+    .resume-name,
+    .resume-role,
+    .resume-period,
+    .resume-skills-list strong,
+    .resume-proj-head h3,
+    .resume-edu-item strong {
+      color: #0f172a !important;
+    }
+
+    .resume-projects-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .resume-two-col {
+      grid-template-columns: 1.2fr 0.8fr !important;
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('astro:page-load', () => {
+    const printBtn = document.querySelector<HTMLButtonElement>('[data-print-resume]');
+    printBtn?.addEventListener('click', () => window.print());
+  });
+</script>

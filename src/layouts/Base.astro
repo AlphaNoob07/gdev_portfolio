@@ -8,6 +8,7 @@ import { ClientRouter } from 'astro:transitions';
 import NavBar from '../components/NavBar.astro';
 import GlassPanel from '../components/GlassPanel.astro';
 import StatsPanel from '../components/StatsPanel.astro';
+import Assistant from '../components/Assistant.astro';
 import { getBlogPosts, getProfile } from '../lib/content';
 
 interface Props {
@@ -72,10 +73,12 @@ const structuredData = jsonLd
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="canonical" href={canonicalUrl} />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
 
     <meta name="theme-color" content="#0b0c10" />
+    <meta property="og:site_name" content={profile.name} />
     <meta property="og:type" content={ogType} />
     <meta property="og:title" content={title} />
     <meta property="og:description" content={description} />
@@ -179,6 +182,8 @@ const structuredData = jsonLd
         </GlassPanel>
       </div>
     </footer>
+
+    {!noindex && <Assistant />}
 
     <script>
       let cleanupEffects: (() => void) | null = null;

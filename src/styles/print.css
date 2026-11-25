@@ -1,19 +1,24 @@
 @media print {
   @page {
     size: A4;
-    margin: 12mm;
+    margin: 12mm 14mm;
   }
 
   html,
   body {
     background: #ffffff !important;
     color: #0f172a !important;
-    font-size: 10.5pt;
+    font-size: 9.8pt;
+    line-height: 1.42;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
   }
 
   .ambient-env,
   .nav-shell,
   .mobile-sheet-backdrop,
+  .site-footer,
+  .assistant-root,
   .skip-link,
   .no-print {
     display: none !important;
@@ -21,6 +26,12 @@
 
   .site-main {
     padding-top: 0 !important;
+  }
+
+  .container {
+    width: 100% !important;
+    max-width: none !important;
+    margin: 0 !important;
   }
 
   .glass-surface,
@@ -31,11 +42,31 @@
     box-shadow: none !important;
     backdrop-filter: none !important;
     -webkit-backdrop-filter: none !important;
+    border-radius: 0 !important;
   }
 
   .glass-surface::before,
   .glass-spotlight::after {
     display: none !important;
+  }
+
+  .resume-section-page {
+    padding-block: 0 !important;
+  }
+
+  .resume-sheet {
+    padding: 0 !important;
+    border: none !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+  }
+
+  .resume-entry,
+  .resume-edu-item,
+  .resume-skill-row,
+  .resume-proj-item {
+    break-inside: avoid;
+    page-break-inside: avoid;
   }
 
   a {

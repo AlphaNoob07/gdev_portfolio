@@ -9,6 +9,10 @@ interface Props {
 }
 
 const { profile, availability } = Astro.props;
+const turnstileSiteKey =
+  import.meta.env.PUBLIC_TURNSTILE_SITE_KEY?.trim() ||
+  process.env.TURNSTILE_SITE_KEY?.trim() ||
+  '';
 ---
 
 <section id="contact" class="section reveal" data-contact-section>
@@ -59,12 +63,17 @@ const { profile, availability } = Astro.props;
               </a>
               <a
                 class="chip contact-link"
-                href="/resume/Resume-Of-MD-Swapon-Islam.pdf"
-                target="_blank"
-                rel="noopener"
+                href="/resume"
+              >
+                Interactive Resume
+              </a>
+              <a
+                class="chip contact-link"
+                href="/resume/Swapon-Islam-Resume.pdf"
+                download="Swapon-Islam-Resume.pdf"
                 data-umami-event="cv_download"
               >
-                Resume (PDF)
+                Download PDF
               </a>
             </div>
           </div>
@@ -151,6 +160,18 @@ const { profile, availability } = Astro.props;
             <span id="error-message" class="field-error" data-error-for="message" />
           </div>
 
+          {
+            turnstileSiteKey && (
+              <div class="turnstile-wrap">
+                <div
+                  class="cf-turnstile"
+                  data-sitekey={turnstileSiteKey}
+                  data-theme="auto"
+                />
+              </div>
+            )
+          }
+
           <div class="form-actions">
             <button type="submit" class="btn btn-primary submit-btn" data-submit-btn>
               <span class="spinner" aria-hidden="true" hidden data-submit-spinner />
@@ -169,6 +190,17 @@ const { profile, availability } = Astro.props;
       </GlassPanel>
     </div>
   </div>
+
+  {
+    turnstileSiteKey && (
+      <script
+        is:inline
+        src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+        async
+        defer
+      />
+    )
+  }
 </section>
 
 <style>
@@ -306,6 +338,10 @@ const { profile, availability } = Astro.props;
     color: #f87171;
   }
 
+  .turnstile-wrap {
+    min-height: 65px;
+  }
+
   .form-actions {
     display: flex;
     align-items: center;
@@ -403,7 +439,7 @@ const { profile, availability } = Astro.props;
       }
     };
 
-    const showStatus = (tone: 'success' | 'error' | 'info', text: string, mailtoHref?: string) => {
+    const showStatus = (tone: 'success' | 'error', text: string, mailtoHref?: string) => {
       if (!statusEl) return;
       statusEl.hidden = false;
       statusEl.dataset.tone = tone;
@@ -412,7 +448,7 @@ const { profile, availability } = Astro.props;
         statusEl.append(' ');
         const link = document.createElement('a');
         link.href = mailtoHref;
-        link.textContent = 'Open in email client';
+        link.textContent = 'Email tm.swapon@gmail.com';
         link.style.color = 'var(--accent-blue)';
         link.style.fontWeight = '600';
         statusEl.appendChild(link);
@@ -478,6 +514,10 @@ const { profile, availability } = Astro.props;
         }
 
         const formData = new FormData(form);
+        const turnstileInput = form.querySelector<HTMLInputElement>(
+          'input[name="cf-turnstile-response"]'
+        );
+
         const payload = {
           name: String(formData.get('name') || '').trim(),
           email: String(formData.get('email') || '').trim(),
@@ -486,6 +526,7 @@ const { profile, availability } = Astro.props;
           website: String(formData.get('website') || ''),
           renderedAt: Number(formData.get('renderedAt') || Date.now()),
           idempotencyKey: String(formData.get('idempotencyKey') || ''),
+          turnstileToken: turnstileInput?.value || '',
         };
 
         if (submitBtn) submitBtn.disabled = true;
@@ -499,18 +540,6 @@ const { profile, availability } = Astro.props;
             body: JSON.stringify(payload),
           });
 
-          if (response.status === 404) {
-            const mailto = `mailto:tm.swapon@gmail.com?subject=${encodeURIComponent(
-              payload.subject || `Portfolio Inquiry from ${payload.name}`
-            )}&body=${encodeURIComponent(`${payload.message}\n\nFrom: ${payload.name} (${payload.email})`)}`;
-            showStatus(
-              'info',
-              'Contact API endpoint activates in Milestone M7. You can send directly via email:',
-              mailto
-            );
-            return;
-          }
-
           const result = (await response.json().catch(() => ({}))) as {
             ok?: boolean;
             message?: string;
@@ -518,11 +547,28 @@ const { profile, availability } = Astro.props;
           };
 
           if (!response.ok) {
+            const mailto =
+              response.status === 503
+                ? `mailto:tm.swapon@gmail.com?subject=${encodeURIComponent(
+                    payload.subject || `Portfolio Inquiry from ${payload.name}`
+                  )}&body=${encodeURIComponent(`${payload.message}\n\nFrom: ${payload.name} (${payload.email})`)}`
+                : undefined;
+
             showStatus(
               'error',
-              result.error || 'Could not send message. Please try again.'
+              result.error || 'Could not send message. Please try again.',
+              mailto
             );
             return;
+          }
+
+          const umami = (
+            window as unknown as {
+              umami?: { track?: (name: string) => void };
+            }
+          ).umami;
+          if (typeof umami?.track === 'function') {
+            umami.track('contact_submit');
           }
 
           showStatus(
@@ -533,6 +579,11 @@ const { profile, availability } = Astro.props;
           if (charCountEl) charCountEl.textContent = '0 / 2000';
           if (renderedAtInput) renderedAtInput.value = String(Date.now());
           if (idempotencyInput) idempotencyInput.value = createIdempotencyKey();
+
+          const turnstile = (
+            window as unknown as { turnstile?: { reset?: () => void } }
+          ).turnstile;
+          turnstile?.reset?.();
         } catch {
           showStatus(
             'error',

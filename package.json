@@ -12,7 +12,9 @@
     "import:linkedin": "node scripts/import-linkedin.ts",
     "snapshot:github": "node scripts/fetch-github-snapshot.ts",
     "db:push": "drizzle-kit push",
-    "db:generate": "drizzle-kit generate"
+    "db:generate": "drizzle-kit generate",
+    "resume": "node scripts/build-resume-pdf.ts",
+    "test:e2e": "node scripts/verify-e2e.ts"
   },
   "dependencies": {
     "@astrojs/mdx": "^8.1.6",
@@ -20,6 +22,7 @@
     "@astrojs/sitemap": "^3.7.6",
     "@astrojs/vercel": "^11.0.22",
     "@fontsource-variable/inter": "^5.3.0",
+    "@google/genai": "^3.6.1",
     "@keystatic/astro": "^6.0.0",
     "@keystatic/core": "^0.6.10",
     "@neondatabase/serverless": "^1.2.1",
@@ -34,6 +37,7 @@
     "@types/react": "^19.3.2",
     "@types/react-dom": "^19.3.0",
     "drizzle-kit": "^0.31.11",
+    "playwright": "^1.65.1",
     "typescript": "^6.0.3"
   }
 }

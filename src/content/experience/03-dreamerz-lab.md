@@ -2,9 +2,9 @@
 order: 3
 company: "Dreamerz Lab Limited"
 role: "AR/VR Developer"
-period: "Mar 2024 – Mar 2025"
+period: "Mar 2024 – Dec 2024"
 startDate: "2024-03"
-endDate: "2025-03"
+endDate: "2024-12"
 current: false
 needsConfirmation: false
 location: "Dhaka, Bangladesh"

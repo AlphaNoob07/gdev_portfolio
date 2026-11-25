@@ -1,0 +1,110 @@
+---
+import Base from '../../layouts/Base.astro';
+import GlassPanel from '../../components/GlassPanel.astro';
+import { getBlogPosts, getProfile } from '../../lib/content';
+
+const [profile, posts] = await Promise.all([getProfile(), getBlogPosts()]);
+
+function getReadingMinutes(body: string | undefined): number {
+  const words = (body || '').trim().split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.ceil(words / 200));
+}
+---
+
+<Base
+  title={`Blog — ${profile.name}`}
+  description={`Engineering notes on XR, spatial computing, game engines, and AI integration by ${profile.name}.`}
+>
+  <section class="section blog-index">
+    <div class="container">
+      <div class="section-head">
+        <span class="eyebrow">Writing</span>
+        <h1 class="section-title">Articles &amp; Notes</h1>
+        <p class="section-subtitle">
+          Notes on spatial computing, Unity/Unreal workflows, computer vision, and interactive simulations.
+        </p>
+      </div>
+
+      {
+        posts.length === 0 ? (
+          <GlassPanel variant="panel" padding="lg">
+            <p class="empty-blog">
+              No articles published yet. Posts authored in Keystatic appear here automatically with reading time and tags.
+            </p>
+          </GlassPanel>
+        ) : (
+          <div class="blog-grid">
+            {posts.map((post) => (
+              <a href={`/blog/${post.id}`} class="blog-card-link">
+                <GlassPanel as="article" variant="card" padding="md" interactive>
+                  <div class="blog-card-meta">
+                    <span class="chip">
+                      {new Intl.DateTimeFormat('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                      }).format(post.data.publishedAt)}
+                    </span>
+                    <span class="chip">{getReadingMinutes(post.body)} min read</span>
+                  </div>
+                  <h2 class="blog-card-title">{post.data.title}</h2>
+                  <p class="blog-card-desc">{post.data.description}</p>
+                  {post.data.tags.length > 0 && (
+                    <div class="blog-card-tags">
+                      {post.data.tags.map((tag) => <span class="chip">{tag}</span>)}
+                    </div>
+                  )}
+                </GlassPanel>
+              </a>
+            ))}
+          </div>
+        )
+      }
+    </div>
+  </section>
+</Base>
+
+<style>
+  .blog-index {
+    padding-top: clamp(1.5rem, 3.5vw, 3rem);
+  }
+
+  .empty-blog {
+    color: var(--text-secondary);
+    font-size: var(--text-base);
+  }
+
+  .blog-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.15rem;
+  }
+
+  .blog-card-link {
+    text-decoration: none;
+    color: inherit;
+  }
+
+  .blog-card-meta,
+  .blog-card-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .blog-card-title {
+    margin-top: 0.75rem;
+    font-size: var(--text-lg);
+    font-weight: 650;
+  }
+
+  .blog-card-desc {
+    margin-top: 0.45rem;
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+  }
+
+  .blog-card-tags {
+    margin-top: 0.85rem;
+  }
+</style>

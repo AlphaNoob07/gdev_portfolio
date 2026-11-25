@@ -1,0 +1,860 @@
+---
+import { ASSISTANT_EXAMPLE_QUESTIONS } from '../lib/knowledge';
+---
+
+<div class="assistant-root no-print" data-assistant-root>
+  <button
+    type="button"
+    class="glass-surface glass-pill assistant-launcher"
+    data-assistant-open
+    aria-expanded="false"
+    aria-controls="portfolio-assistant-sheet"
+    data-umami-event="assistant_open"
+  >
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+    </svg>
+    <span>Ask AI</span>
+  </button>
+
+  <section
+    id="portfolio-assistant-sheet"
+    class="glass-surface glass-modal assistant-sheet"
+    role="dialog"
+    aria-label="Portfolio Voice & AI Assistant"
+    data-assistant-sheet
+    hidden
+  >
+    <header class="assistant-header">
+      <div class="assistant-title-wrap">
+        <span class="assistant-dot" aria-hidden="true"></span>
+        <div>
+          <h2 class="assistant-title">Ask about Swapon</h2>
+          <span class="assistant-mode" data-assistant-mode>Voice &amp; AI Ready</span>
+        </div>
+      </div>
+
+      <div class="assistant-head-actions">
+        <button
+          type="button"
+          class="glass-pill assistant-icon-btn assistant-voice-toggle"
+          data-assistant-voice-toggle
+          aria-pressed="false"
+          aria-label="Toggle spoken voice replies"
+          title="Toggle spoken voice replies"
+        >
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14"></path>
+          </svg>
+          <span>Voice</span>
+        </button>
+        <button
+          type="button"
+          class="glass-pill assistant-icon-btn"
+          data-assistant-clear
+          aria-label="Clear conversation"
+          title="Clear conversation"
+        >
+          Clear
+        </button>
+        <button
+          type="button"
+          class="glass-pill assistant-icon-btn"
+          data-assistant-close
+          aria-label="Close assistant"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+            <path d="M18 6 6 18"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+        </button>
+      </div>
+    </header>
+
+    <div
+      class="assistant-messages"
+      role="log"
+      aria-live="polite"
+      aria-relevant="additions text"
+      data-assistant-log
+    >
+      <div class="assistant-msg assistant-msg--bot">
+        <p class="assistant-msg-text">
+          Ask me by text or tap the mic to talk about Swapon&apos;s XR projects, engines, career timeline, or contact details.
+        </p>
+      </div>
+    </div>
+
+    <div class="assistant-chips" aria-label="Suggested questions">
+      {
+        ASSISTANT_EXAMPLE_QUESTIONS.map((q) => (
+          <button
+            type="button"
+            class="chip assistant-chip"
+            data-assistant-chip={q}
+          >
+            {q}
+          </button>
+        ))
+      }
+    </div>
+
+    <form class="assistant-form" data-assistant-form>
+      <label for="assistant-input" class="sr-only">Ask a question</label>
+      <div class="assistant-input-row">
+        <input
+          id="assistant-input"
+          name="message"
+          type="text"
+          maxlength="500"
+          autocomplete="off"
+          placeholder="Ask or tap mic to speak..."
+          data-assistant-input
+        />
+        <button
+          type="button"
+          class="glass-pill assistant-mic"
+          data-assistant-mic
+          aria-pressed="false"
+          aria-label="Start voice input"
+          title="Speak your question"
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" x2="12" y1="19" y2="22"></line>
+          </svg>
+        </button>
+        <button
+          type="submit"
+          class="btn btn-primary assistant-send"
+          data-assistant-send
+        >
+          Send
+        </button>
+      </div>
+      <div class="assistant-footer">
+        <span class="assistant-note">
+          AI answers may be imperfect · <a href="/#contact">Contact form</a>
+        </span>
+        <span class="assistant-counter" data-assistant-counter>0 / 500</span>
+      </div>
+    </form>
+  </section>
+</div>
+
+<style>
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+  }
+
+  .assistant-root {
+    position: fixed;
+    right: max(1rem, env(safe-area-inset-right));
+    bottom: max(1rem, env(safe-area-inset-bottom));
+    z-index: var(--z-sheet);
+    display: grid;
+    justify-items: end;
+    gap: 0.75rem;
+  }
+
+  .assistant-launcher {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 46px;
+    padding: 0.65rem 1.15rem;
+    font-size: var(--text-sm);
+    font-weight: 600;
+    color: var(--text-primary);
+    background: var(--glass-bg-elevated);
+    border-color: var(--glass-border-strong);
+    box-shadow: var(--glass-shadow-sm);
+    cursor: pointer;
+    backdrop-filter: blur(20px) saturate(160%);
+    -webkit-backdrop-filter: blur(20px) saturate(160%);
+  }
+
+  .assistant-launcher:hover {
+    background: var(--glass-pill-hover);
+    transform: translateY(-1px);
+  }
+
+  .assistant-sheet {
+    width: min(430px, calc(100vw - 2rem));
+    max-height: min(630px, calc(100vh - 6rem));
+    display: grid;
+    grid-template-rows: auto minmax(140px, 1fr) auto auto;
+    padding: 0;
+  }
+
+  .assistant-sheet[hidden] {
+    display: none;
+  }
+
+  .assistant-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid var(--glass-border);
+  }
+
+  .assistant-title-wrap {
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+  }
+
+  .assistant-dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 9999px;
+    background: var(--accent-gradient);
+    box-shadow: 0 0 10px rgba(96, 165, 250, 0.75);
+  }
+
+  .assistant-title {
+    font-size: var(--text-sm);
+    font-weight: 700;
+    line-height: 1.2;
+  }
+
+  .assistant-mode {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+  }
+
+  .assistant-head-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .assistant-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3rem;
+    min-height: 32px;
+    padding: 0.28rem 0.62rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    cursor: pointer;
+  }
+
+  .assistant-icon-btn:hover {
+    color: var(--text-primary);
+    background: var(--glass-pill-hover);
+  }
+
+  .assistant-voice-toggle[aria-pressed='true'] {
+    color: var(--text-primary);
+    background: var(--glass-pill-hover);
+    border-color: var(--accent-blue);
+  }
+
+  .assistant-messages {
+    overflow-y: auto;
+    padding: 0.95rem 1.05rem;
+    display: grid;
+    gap: 0.65rem;
+    align-content: start;
+  }
+
+  :global(.assistant-msg) {
+    padding: 0.68rem 0.9rem;
+    border-radius: 16px;
+    font-size: var(--text-sm);
+    line-height: 1.5;
+    max-width: 92%;
+    white-space: pre-wrap;
+    word-break: break-word;
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  :global(.assistant-msg-text) {
+    margin: 0;
+  }
+
+  :global(.assistant-msg--bot) {
+    justify-self: start;
+    background: var(--glass-pill-bg);
+    border: 1px solid var(--glass-border);
+    color: var(--text-primary);
+  }
+
+  :global(.assistant-msg--user) {
+    justify-self: end;
+    background: var(--accent-gradient);
+    color: var(--text-on-accent);
+  }
+
+  :global(.assistant-speak-btn) {
+    justify-self: start;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.18rem 0.55rem;
+    border-radius: 9999px;
+    border: 1px solid var(--glass-border);
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  :global(.assistant-speak-btn:hover) {
+    color: var(--text-primary);
+    border-color: var(--glass-border-strong);
+  }
+
+  .assistant-chips {
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0.4rem;
+    overflow-x: auto;
+    padding: 0.55rem 1rem;
+    border-top: 1px solid var(--glass-border);
+  }
+
+  .assistant-chip {
+    flex: 0 0 auto;
+    max-width: 240px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+  }
+
+  .assistant-chip:hover {
+    background: var(--glass-pill-hover);
+    border-color: var(--glass-border-strong);
+    color: var(--text-primary);
+  }
+
+  .assistant-form {
+    padding: 0.75rem 1rem 0.9rem;
+    border-top: 1px solid var(--glass-border);
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  .assistant-input-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto auto;
+    gap: 0.45rem;
+    align-items: center;
+  }
+
+  .assistant-input-row input {
+    width: 100%;
+    padding: 0.6rem 0.85rem;
+    border-radius: var(--radius-pill);
+    border: 1px solid var(--glass-border);
+    background: var(--glass-pill-bg);
+    color: var(--text-primary);
+    font-size: var(--text-sm);
+  }
+
+  .assistant-input-row input:focus {
+    outline: none;
+    border-color: var(--accent-blue);
+  }
+
+  .assistant-mic {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    color: var(--text-primary);
+    cursor: pointer;
+    transition:
+      background-color var(--duration-fast) ease,
+      border-color var(--duration-fast) ease,
+      box-shadow var(--duration-fast) ease;
+  }
+
+  .assistant-mic:hover {
+    background: var(--glass-pill-hover);
+    border-color: var(--glass-border-strong);
+  }
+
+  .assistant-mic[hidden] {
+    display: none;
+  }
+
+  .assistant-mic.is-listening {
+    border-color: #ef4444;
+    background: rgba(239, 68, 68, 0.22);
+    box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.25);
+  }
+
+  .assistant-send {
+    min-height: 40px;
+    padding: 0.45rem 1rem;
+  }
+
+  .assistant-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+  }
+
+  .assistant-note a {
+    color: var(--accent-blue);
+    text-decoration: none;
+  }
+
+  .assistant-note a:hover {
+    text-decoration: underline;
+  }
+</style>
+
+<script>
+  interface ChatTurn {
+    role: 'user' | 'assistant';
+    text: string;
+  }
+
+  interface SpeechRecognitionResultLike {
+    readonly isFinal: boolean;
+    readonly [index: number]: { readonly transcript: string };
+  }
+
+  interface SpeechRecognitionEventLike {
+    readonly results: ArrayLike<SpeechRecognitionResultLike>;
+  }
+
+  interface SpeechRecognitionErrorEventLike {
+    readonly error: string;
+  }
+
+  interface SpeechRecognitionInstance {
+    lang: string;
+    interimResults: boolean;
+    continuous: boolean;
+    onstart: (() => void) | null;
+    onresult: ((event: SpeechRecognitionEventLike) => void) | null;
+    onerror: ((event: SpeechRecognitionErrorEventLike) => void) | null;
+    onend: (() => void) | null;
+    start(): void;
+    stop(): void;
+    abort(): void;
+  }
+
+  type SpeechRecognitionCtor = new () => SpeechRecognitionInstance;
+
+  let cleanupAssistant: (() => void) | null = null;
+
+  function getSpeechRecognitionCtor(): SpeechRecognitionCtor | null {
+    const win = window as unknown as {
+      SpeechRecognition?: SpeechRecognitionCtor;
+      webkitSpeechRecognition?: SpeechRecognitionCtor;
+    };
+    return win.SpeechRecognition ?? win.webkitSpeechRecognition ?? null;
+  }
+
+  function initAssistant(): void {
+    cleanupAssistant?.();
+    const root = document.querySelector<HTMLElement>('[data-assistant-root]');
+    if (!root) return;
+
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    const openBtn = root.querySelector<HTMLButtonElement>('[data-assistant-open]');
+    const closeBtn = root.querySelector<HTMLButtonElement>('[data-assistant-close]');
+    const clearBtn = root.querySelector<HTMLButtonElement>('[data-assistant-clear]');
+    const voiceToggleBtn = root.querySelector<HTMLButtonElement>(
+      '[data-assistant-voice-toggle]'
+    );
+    const micBtn = root.querySelector<HTMLButtonElement>('[data-assistant-mic]');
+    const sheet = root.querySelector<HTMLElement>('[data-assistant-sheet]');
+    const log = root.querySelector<HTMLElement>('[data-assistant-log]');
+    const modeEl = root.querySelector<HTMLElement>('[data-assistant-mode]');
+    const form = root.querySelector<HTMLFormElement>('[data-assistant-form]');
+    const input = root.querySelector<HTMLInputElement>('[data-assistant-input]');
+    const sendBtn = root.querySelector<HTMLButtonElement>('[data-assistant-send]');
+    const counter = root.querySelector<HTMLElement>('[data-assistant-counter]');
+
+    let history: ChatTurn[] = [];
+    let busy = false;
+    let voiceReplyEnabled = false;
+    let listening = false;
+    let recognition: SpeechRecognitionInstance | null = null;
+
+    const canSpeak =
+      typeof window !== 'undefined' && 'speechSynthesis' in window;
+    const RecognitionCtor = getSpeechRecognitionCtor();
+
+    if (micBtn && !RecognitionCtor) {
+      micBtn.hidden = true;
+    }
+    if (voiceToggleBtn && !canSpeak) {
+      voiceToggleBtn.hidden = true;
+    }
+
+    const stopSpeaking = () => {
+      if (canSpeak) {
+        window.speechSynthesis.cancel();
+      }
+      root
+        .querySelectorAll<HTMLButtonElement>('.assistant-speak-btn')
+        .forEach((btn) => {
+          btn.textContent = 'Speak';
+        });
+    };
+
+    const speakText = (text: string, btn?: HTMLButtonElement) => {
+      if (!canSpeak || !text.trim()) return;
+      stopSpeaking();
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.lang = 'en-US';
+      utterance.rate = 1;
+      if (btn) {
+        btn.textContent = 'Stop';
+        utterance.onend = () => {
+          btn.textContent = 'Speak';
+        };
+        utterance.onerror = () => {
+          btn.textContent = 'Speak';
+        };
+      }
+      window.speechSynthesis.speak(utterance);
+    };
+
+    const stopListening = () => {
+      if (recognition && listening) {
+        try {
+          recognition.stop();
+        } catch {
+          // Ignore stop errors
+        }
+      }
+      listening = false;
+      if (micBtn) {
+        micBtn.classList.remove('is-listening');
+        micBtn.setAttribute('aria-pressed', 'false');
+        micBtn.setAttribute('aria-label', 'Start voice input');
+      }
+    };
+
+    const setOpen = (isOpen: boolean) => {
+      if (!sheet || !openBtn) return;
+      sheet.hidden = !isOpen;
+      openBtn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+      if (isOpen) {
+        const umami = (
+          window as unknown as { umami?: { track?: (n: string) => void } }
+        ).umami;
+        umami?.track?.('assistant_open');
+        input?.focus();
+      } else {
+        stopListening();
+        stopSpeaking();
+        openBtn.focus();
+      }
+    };
+
+    const appendMessage = (
+      role: 'user' | 'assistant',
+      text: string
+    ): { textEl: HTMLParagraphElement; speakBtn?: HTMLButtonElement } => {
+      const bubble = document.createElement('div');
+      bubble.className = `assistant-msg ${role === 'user' ? 'assistant-msg--user' : 'assistant-msg--bot'}`;
+
+      const textEl = document.createElement('p');
+      textEl.className = 'assistant-msg-text';
+      textEl.textContent = text;
+      bubble.appendChild(textEl);
+
+      let speakBtn: HTMLButtonElement | undefined;
+      if (role === 'assistant' && canSpeak) {
+        speakBtn = document.createElement('button');
+        speakBtn.type = 'button';
+        speakBtn.className = 'assistant-speak-btn';
+        speakBtn.textContent = 'Speak';
+        speakBtn.hidden = true;
+        speakBtn.addEventListener(
+          'click',
+          () => {
+            if (speakBtn?.textContent === 'Stop') {
+              stopSpeaking();
+            } else {
+              speakText(textEl.textContent || '', speakBtn);
+            }
+          },
+          { signal }
+        );
+        bubble.appendChild(speakBtn);
+      }
+
+      log?.appendChild(bubble);
+      if (log) {
+        log.scrollTop = log.scrollHeight;
+      }
+      return { textEl, speakBtn };
+    };
+
+    const sendQuestion = async (rawText: string, shouldSpeak = voiceReplyEnabled) => {
+      const question = rawText.trim().slice(0, 500);
+      if (!question || busy) return;
+
+      stopSpeaking();
+      busy = true;
+      if (sendBtn) sendBtn.disabled = true;
+      if (input) input.value = '';
+      if (counter) counter.textContent = '0 / 500';
+
+      appendMessage('user', question);
+      const { textEl, speakBtn } = appendMessage('assistant', 'Thinking...');
+
+      try {
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            message: question,
+            history: history.slice(-8),
+          }),
+          signal,
+        });
+
+        const mode = res.headers.get('X-Assistant-Mode');
+        if (modeEl && mode) {
+          modeEl.textContent = mode === 'live' ? 'Gemini AI' : 'FAQ Fallback';
+        }
+
+        if (!res.ok) {
+          const errJson = (await res.json().catch(() => ({}))) as { error?: string };
+          textEl.textContent =
+            errJson.error || 'Could not reach assistant right now. Please use the contact form.';
+          return;
+        }
+
+        let finalAnswer = '';
+        if (!res.body) {
+          finalAnswer = await res.text();
+          textEl.textContent = finalAnswer;
+        } else {
+          const reader = res.body.getReader();
+          const decoder = new TextDecoder();
+          textEl.textContent = '';
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            finalAnswer += decoder.decode(value, { stream: true });
+            textEl.textContent = finalAnswer;
+            if (log) log.scrollTop = log.scrollHeight;
+          }
+          finalAnswer += decoder.decode();
+        }
+
+        if (!finalAnswer.trim()) {
+          finalAnswer = "I don't have that information. Please use the contact form (#contact).";
+          textEl.textContent = finalAnswer;
+        }
+
+        if (speakBtn) {
+          speakBtn.hidden = false;
+        }
+        if (shouldSpeak) {
+          speakText(finalAnswer, speakBtn);
+        }
+
+        history = [
+          ...history,
+          { role: 'user' as const, text: question },
+          { role: 'assistant' as const, text: finalAnswer },
+        ].slice(-8);
+      } catch {
+        if (!signal.aborted) {
+          textEl.textContent =
+            'Connection error. Please try again or reach out via the contact form.';
+        }
+      } finally {
+        busy = false;
+        if (sendBtn) sendBtn.disabled = false;
+      }
+    };
+
+    voiceToggleBtn?.addEventListener(
+      'click',
+      () => {
+        voiceReplyEnabled = !voiceReplyEnabled;
+        voiceToggleBtn.setAttribute(
+          'aria-pressed',
+          voiceReplyEnabled ? 'true' : 'false'
+        );
+        if (!voiceReplyEnabled) {
+          stopSpeaking();
+        }
+      },
+      { signal }
+    );
+
+    micBtn?.addEventListener(
+      'click',
+      () => {
+        if (!RecognitionCtor) return;
+        if (listening) {
+          stopListening();
+          return;
+        }
+
+        stopSpeaking();
+        const rec = new RecognitionCtor();
+        recognition = rec;
+        rec.lang = 'en-US';
+        rec.interimResults = true;
+        rec.continuous = false;
+
+        let finalTranscript = '';
+
+        rec.onstart = () => {
+          listening = true;
+          micBtn.classList.add('is-listening');
+          micBtn.setAttribute('aria-pressed', 'true');
+          micBtn.setAttribute('aria-label', 'Stop voice input');
+          if (modeEl) modeEl.textContent = 'Listening...';
+        };
+
+        rec.onresult = (event) => {
+          let interim = '';
+          finalTranscript = '';
+          for (let i = 0; i < event.results.length; i += 1) {
+            const res = event.results[i];
+            const piece = res[0]?.transcript || '';
+            if (res.isFinal) {
+              finalTranscript += piece;
+            } else {
+              interim += piece;
+            }
+          }
+          const combined = `${finalTranscript}${interim}`.trim().slice(0, 500);
+          if (input) input.value = combined;
+          if (counter) counter.textContent = `${combined.length} / 500`;
+        };
+
+        rec.onerror = (event) => {
+          stopListening();
+          if (modeEl) {
+            modeEl.textContent =
+              event.error === 'not-allowed'
+                ? 'Microphone permission denied'
+                : 'Voice input unavailable — try typing';
+          }
+        };
+
+        rec.onend = () => {
+          const spokenText = (finalTranscript || input?.value || '').trim();
+          stopListening();
+          if (modeEl && modeEl.textContent === 'Listening...') {
+            modeEl.textContent = 'Voice & AI Ready';
+          }
+          if (spokenText) {
+            sendQuestion(spokenText, true);
+          }
+        };
+
+        try {
+          rec.start();
+        } catch {
+          stopListening();
+        }
+      },
+      { signal }
+    );
+
+    openBtn?.addEventListener(
+      'click',
+      () => setOpen(Boolean(sheet?.hidden)),
+      { signal }
+    );
+    closeBtn?.addEventListener('click', () => setOpen(false), { signal });
+    clearBtn?.addEventListener(
+      'click',
+      () => {
+        stopSpeaking();
+        history = [];
+        if (log) {
+          log.textContent = '';
+          appendMessage(
+            'assistant',
+            "Ask me by text or tap the mic to talk about Swapon's XR projects, engines, career timeline, or contact details."
+          );
+        }
+      },
+      { signal }
+    );
+
+    input?.addEventListener(
+      'input',
+      () => {
+        if (counter) {
+          counter.textContent = `${input.value.length} / 500`;
+        }
+      },
+      { signal }
+    );
+
+    root.querySelectorAll<HTMLButtonElement>('[data-assistant-chip]').forEach((chip) => {
+      chip.addEventListener(
+        'click',
+        () => {
+          const q = chip.dataset.assistantChip;
+          if (q) sendQuestion(q);
+        },
+        { signal }
+      );
+    });
+
+    form?.addEventListener(
+      'submit',
+      (event) => {
+        event.preventDefault();
+        if (input) sendQuestion(input.value);
+      },
+      { signal }
+    );
+
+    window.addEventListener(
+      'keydown',
+      (event) => {
+        if (event.key === 'Escape' && sheet && !sheet.hidden) {
+          setOpen(false);
+        }
+      },
+      { signal }
+    );
+
+    cleanupAssistant = () => {
+      try {
+        recognition?.abort();
+      } catch {
+        // Ignore abort errors
+      }
+      stopSpeaking();
+      controller.abort();
+    };
+  }
+
+  document.addEventListener('astro:page-load', initAssistant);
+</script>
