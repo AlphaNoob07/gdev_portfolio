@@ -1,0 +1,128 @@
+---
+import profilePic from '../assets/profile_pic.jpg';
+---
+
+<button
+  type="button"
+  class="lp-scroll-avatar"
+  data-scroll-avatar
+  aria-label="Scroll back to top"
+  hidden
+>
+  <svg class="lp-scroll-ring" viewBox="0 0 56 56" aria-hidden="true">
+    <circle cx="28" cy="28" r="25" class="lp-ring-track" />
+    <circle cx="28" cy="28" r="25" class="lp-ring-fill" data-ring-fill />
+  </svg>
+  <img src={profilePic.src} alt="" class="lp-scroll-img" loading="lazy" />
+  <span class="lp-scroll-arrow" aria-hidden="true">&uarr;</span>
+</button>
+
+<style>
+  .lp-scroll-avatar {
+    position: fixed;
+    right: 1.5rem;
+    bottom: 5.5rem;
+    z-index: 45;
+    width: 56px;
+    height: 56px;
+    padding: 0;
+    border: none;
+    border-radius: 9999px;
+    background: #0e1726;
+    cursor: pointer;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
+    transition: transform 200ms var(--ease-spring), opacity 200ms ease;
+  }
+
+  .lp-scroll-avatar[hidden] {
+    display: none;
+  }
+
+  .lp-scroll-avatar:hover {
+    transform: translateY(-3px);
+  }
+
+  .lp-scroll-ring {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    transform: rotate(-90deg);
+  }
+
+  .lp-ring-track {
+    fill: none;
+    stroke: rgba(215, 226, 234, 0.14);
+    stroke-width: 2.5;
+  }
+
+  .lp-ring-fill {
+    fill: none;
+    stroke: var(--lp-accent);
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-dasharray: 157.08;
+    stroke-dashoffset: 157.08;
+  }
+
+  .lp-scroll-img {
+    width: 44px;
+    height: 44px;
+    border-radius: 9999px;
+    object-fit: cover;
+    object-position: center 20%;
+    position: absolute;
+    top: 6px;
+    left: 6px;
+  }
+
+  .lp-scroll-arrow {
+    position: absolute;
+    right: -2px;
+    bottom: -2px;
+    width: 20px;
+    height: 20px;
+    border-radius: 9999px;
+    background: var(--lp-accent);
+    color: #09101b;
+    font-size: 0.72rem;
+    font-weight: 800;
+    display: grid;
+    place-items: center;
+  }
+</style>
+
+<script>
+  let cleanupScrollAvatar: (() => void) | null = null;
+
+  function initScrollAvatar(): void {
+    cleanupScrollAvatar?.();
+    const btn = document.querySelector<HTMLButtonElement>('[data-scroll-avatar]');
+    const ring = btn?.querySelector<SVGCircleElement>('[data-ring-fill]');
+    if (!btn || !ring) return;
+
+    const controller = new AbortController();
+    const { signal } = controller;
+    const circumference = 2 * Math.PI * 25;
+
+    const update = () => {
+      const y = window.scrollY;
+      const max = Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+      const pct = Math.min(1, Math.max(0, y / max));
+      btn.hidden = y < window.innerHeight * 0.65;
+      ring.style.strokeDashoffset = String(circumference * (1 - pct));
+    };
+
+    window.addEventListener('scroll', update, { passive: true, signal });
+    btn.addEventListener(
+      'click',
+      () => window.scrollTo({ top: 0, behavior: 'smooth' }),
+      { signal }
+    );
+    update();
+
+    cleanupScrollAvatar = () => controller.abort();
+  }
+
+  document.addEventListener('astro:page-load', initScrollAvatar);
+</script>

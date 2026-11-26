@@ -1,0 +1,374 @@
+---
+import type { ProfileData } from '../lib/content';
+
+interface Props {
+  profile: ProfileData;
+}
+
+const { profile } = Astro.props;
+---
+
+<div
+  class="lp-modal-backdrop"
+  data-contact-modal
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="lp-modal-title"
+  hidden
+>
+  <div class="lp-modal-card">
+    <div class="lp-modal-head">
+      <div>
+        <span class="lp-modal-eyebrow">Direct Inquiry</span>
+        <h2 id="lp-modal-title" class="lp-modal-title">Let&rsquo;s Build</h2>
+      </div>
+      <button
+        type="button"
+        class="lp-modal-close"
+        aria-label="Close contact dialog"
+        data-close-contact
+      >
+        &times;
+      </button>
+    </div>
+
+    <form class="lp-modal-form" data-modal-form novalidate>
+      <input type="text" name="website" tabindex="-1" autocomplete="off" class="lp-hp" aria-hidden="true" />
+
+      <div class="lp-field-row">
+        <label class="lp-field">
+          <span>Your Name</span>
+          <input type="text" name="name" required placeholder="Alex Morgan" autocomplete="name" />
+        </label>
+        <label class="lp-field">
+          <span>Your Email</span>
+          <input type="email" name="email" required placeholder="alex@company.com" autocomplete="email" />
+        </label>
+      </div>
+
+      <label class="lp-field">
+        <span>Engineering Service Required</span>
+        <select name="subject">
+          <option value="01 — Spatial Computing & AR/VR Architecture">
+            01 — Spatial Computing &amp; AR/VR Architecture
+          </option>
+          <option value="02 — Medical & Enterprise XR Simulations">
+            02 — Medical &amp; Enterprise XR Simulations
+          </option>
+          <option value="03 — Multiplayer & Real-Time Game Systems">
+            03 — Multiplayer &amp; Real-Time Game Systems
+          </option>
+          <option value="04 — AI, Computer Vision & Body Sensing">
+            04 — AI, Computer Vision &amp; Body Sensing
+          </option>
+          <option value="05 — Prototyping to Shipped Production">
+            05 — Prototyping to Shipped Production
+          </option>
+        </select>
+      </label>
+
+      <label class="lp-field">
+        <span>Project or Role Overview</span>
+        <textarea
+          name="message"
+          rows="4"
+          required
+          placeholder="Tell me about your XR/game project, timeline, or role..."
+        ></textarea>
+      </label>
+
+      <p class="lp-modal-status" data-modal-status aria-live="polite"></p>
+
+      <div class="lp-modal-foot">
+        <div class="lp-modal-direct">
+          <span>Or email directly:</span>
+          <a href={`mailto:${profile.email}`}>{profile.email}</a>
+        </div>
+        <button type="submit" class="lp-btn-mint" data-modal-submit>
+          Contact me
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<style>
+  .lp-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-modal);
+    background: rgba(6, 11, 20, 0.78);
+    backdrop-filter: blur(10px);
+    display: grid;
+    place-items: center;
+    padding: 1.25rem;
+  }
+
+  .lp-modal-backdrop[hidden] {
+    display: none;
+  }
+
+  .lp-modal-card {
+    width: 100%;
+    max-width: 580px;
+    background: #0e1726;
+    border: 1px solid var(--lp-border-strong);
+    border-radius: 24px;
+    padding: clamp(1.35rem, 3vw, 2rem);
+    box-shadow: 0 32px 64px -16px rgba(0, 0, 0, 0.75);
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .lp-modal-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+
+  .lp-modal-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--lp-accent);
+  }
+
+  .lp-modal-title {
+    margin: 0.25rem 0 0;
+    font-family: var(--font-display);
+    font-size: 1.85rem;
+    font-weight: 800;
+    color: var(--lp-text-strong);
+  }
+
+  .lp-modal-close {
+    width: 36px;
+    height: 36px;
+    border-radius: 9999px;
+    border: 1px solid var(--lp-border);
+    background: rgba(215, 226, 234, 0.05);
+    color: var(--lp-text-strong);
+    font-size: 1.35rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+
+  .lp-modal-form {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .lp-hp {
+    position: absolute;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+  }
+
+  .lp-field-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.85rem;
+  }
+
+  .lp-field {
+    display: grid;
+    gap: 0.35rem;
+    font-size: 0.8rem;
+    color: var(--lp-text);
+  }
+
+  .lp-field input,
+  .lp-field select,
+  .lp-field textarea {
+    width: 100%;
+    padding: 0.7rem 0.9rem;
+    border-radius: 12px;
+    border: 1px solid var(--lp-border);
+    background: #131f33;
+    color: var(--lp-text-strong);
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+  }
+
+  .lp-field input:focus,
+  .lp-field select:focus,
+  .lp-field textarea:focus {
+    outline: none;
+    border-color: var(--lp-accent);
+  }
+
+  .lp-modal-status {
+    margin: 0;
+    min-height: 1.2em;
+    font-size: 0.82rem;
+    color: var(--lp-accent);
+  }
+
+  .lp-modal-status.is-error {
+    color: #f87171;
+  }
+
+  .lp-modal-foot {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .lp-modal-direct {
+    display: grid;
+    gap: 0.15rem;
+    font-size: 0.76rem;
+    color: var(--lp-text-muted);
+  }
+
+  .lp-modal-direct a {
+    font-family: var(--font-mono);
+    color: var(--lp-accent);
+    text-decoration: none;
+  }
+
+  .lp-btn-mint {
+    padding: 0.78rem 1.6rem;
+    border-radius: 9999px;
+    border: none;
+    background: var(--lp-accent);
+    color: #09101b;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+  }
+
+  @media (max-width: 560px) {
+    .lp-field-row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  let cleanupModal: (() => void) | null = null;
+
+  function initContactModal(): void {
+    cleanupModal?.();
+    const modal = document.querySelector<HTMLElement>('[data-contact-modal]');
+    const form = modal?.querySelector<HTMLFormElement>('[data-modal-form]');
+    const statusEl = modal?.querySelector<HTMLElement>('[data-modal-status]');
+    const submitBtn = modal?.querySelector<HTMLButtonElement>('[data-modal-submit]');
+    if (!modal || !form) return;
+
+    const controller = new AbortController();
+    const { signal } = controller;
+    let openedAt = Date.now();
+
+    const openModal = () => {
+      modal.hidden = false;
+      openedAt = Date.now();
+      document.body.style.overflow = 'hidden';
+      form.querySelector<HTMLInputElement>('input[name="name"]')?.focus();
+    };
+
+    const closeModal = () => {
+      modal.hidden = true;
+      document.body.style.overflow = '';
+    };
+
+    window.addEventListener('lp:open-contact', openModal, { signal });
+    modal.querySelector('[data-close-contact]')?.addEventListener('click', closeModal, { signal });
+    modal.addEventListener(
+      'click',
+      (e) => {
+        if (e.target === modal) closeModal();
+      },
+      { signal }
+    );
+    window.addEventListener(
+      'keydown',
+      (e) => {
+        if (e.key === 'Escape' && !modal.hidden) closeModal();
+      },
+      { signal }
+    );
+
+    form.addEventListener(
+      'submit',
+      async (e) => {
+        e.preventDefault();
+        const fd = new FormData(form);
+        const name = String(fd.get('name') || '').trim();
+        const email = String(fd.get('email') || '').trim();
+        const subject = String(fd.get('subject') || '').trim();
+        const message = String(fd.get('message') || '').trim();
+        const website = String(fd.get('website') || '');
+
+        if (!name || !email || !message) {
+          if (statusEl) {
+            statusEl.textContent = 'Please fill in your name, email, and project overview.';
+            statusEl.classList.add('is-error');
+          }
+          return;
+        }
+
+        if (submitBtn) {
+          submitBtn.disabled = true;
+          submitBtn.textContent = 'Sending...';
+        }
+        if (statusEl) {
+          statusEl.textContent = '';
+          statusEl.classList.remove('is-error');
+        }
+
+        try {
+          const res = await fetch('/api/contact', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name,
+              email,
+              subject,
+              message,
+              website,
+              elapsedMs: Date.now() - openedAt,
+              idempotencyKey: crypto.randomUUID(),
+            }),
+          });
+          const data = (await res.json().catch(() => ({}))) as {
+            ok?: boolean;
+            error?: string;
+          };
+          if (res.ok && data.ok) {
+            if (statusEl) {
+              statusEl.textContent = 'Message sent! I will get back to you shortly.';
+            }
+            form.reset();
+          } else if (statusEl) {
+            statusEl.textContent =
+              data.error || 'Could not send right now. Please email gdev.swapon@gmail.com directly.';
+            statusEl.classList.add('is-error');
+          }
+        } catch {
+          if (statusEl) {
+            statusEl.textContent =
+              'Network error. Please email gdev.swapon@gmail.com directly.';
+            statusEl.classList.add('is-error');
+          }
+        } finally {
+          if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Contact me';
+          }
+        }
+      },
+      { signal }
+    );
+
+    cleanupModal = () => controller.abort();
+  }
+
+  document.addEventListener('astro:page-load', initContactModal);
+</script>

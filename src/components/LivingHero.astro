@@ -1,0 +1,633 @@
+---
+import profilePic from '../assets/profile_pic.jpg';
+import type { AvailabilityData, ProfileData } from '../lib/content';
+
+interface Props {
+  profile: ProfileData;
+  availability: AvailabilityData;
+}
+
+const { profile, availability } = Astro.props;
+
+const orbitSkills = [
+  'Unity',
+  'Unreal Engine',
+  'C#',
+  'C++',
+  'OpenXR',
+  'Meta Quest',
+  'ARCore',
+  'Android XR',
+  'Python',
+  'Computer Vision',
+  'Multiplayer',
+];
+---
+
+<section id="top" class="lp-hero" data-living-hero>
+  <canvas class="hero-bg-canvas" data-hero-bg aria-hidden="true"></canvas>
+
+  <div class="lp-hero-stage">
+    <div class="lp-hero-center">
+      <h1 class="lp-split-name" aria-label={profile.name}>
+        <span class="lp-name-left">Swapon</span>
+        <span class="lp-name-right">
+          <span class="lp-i-wrap">
+            <span class="lp-i-dot" aria-hidden="true"></span>I
+          </span>slam
+        </span>
+      </h1>
+
+      <div class="lp-portrait-hub" id="magnetWrap" data-magnet-wrap>
+        <div class="lp-portrait-inner" id="magnetInner" data-magnet-inner>
+          <canvas
+            id="faceGl"
+            class="lp-face-canvas"
+            width="640"
+            height="640"
+            data-sprite-src="/portrait/spritesheet.jpg"
+            data-fallback-src={profilePic.src}
+            role="button"
+            tabindex="0"
+            aria-label="Interactive portrait of Swapon Islam — move cursor to track gaze, click for reaction"
+          ></canvas>
+          <img
+            src={profilePic.src}
+            alt={profile.fullName}
+            class="lp-face-fallback"
+            data-face-fallback
+            loading="eager"
+          />
+        </div>
+
+        <div class="orbit-layer" data-orbit-layer aria-hidden="true">
+          {
+            orbitSkills.map((skill, idx) => (
+              <span class="orbit-pill" data-orbit-pill data-orbit-index={idx}>
+                {skill}
+              </span>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="lp-hero-bottom">
+      <div class="lp-hero-status">
+        <div class="lp-status-line">
+          <span class="lp-status-sq" aria-hidden="true"></span>
+          <span>
+            {availability.note || 'Open to XR, Spatial Computing & Senior Game Engineering roles'}
+          </span>
+        </div>
+        <p class="lp-hero-bio">
+          {profile.headline}. Building production AR/VR simulations, spatial apps, and real-time 3D experiences from {profile.location}.
+        </p>
+      </div>
+
+      <div class="lp-hero-cta">
+        <button type="button" class="lp-btn-mint" data-open-contact>
+          Contact me
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .lp-hero {
+    position: relative;
+    min-height: 100svh;
+    background: var(--lp-bg);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    padding-top: 4.5rem;
+  }
+
+  .hero-bg-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .lp-hero-stage {
+    position: relative;
+    z-index: 2;
+    flex: 1;
+    width: 100%;
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding: 1.5rem clamp(1.25rem, 4vw, 2.5rem) clamp(1.75rem, 3.5vw, 2.75rem);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1.5rem;
+  }
+
+  .lp-hero-center {
+    position: relative;
+    flex: 1;
+    display: grid;
+    place-items: center;
+    min-height: clamp(360px, 60vh, 580px);
+  }
+
+  .lp-split-name {
+    position: relative;
+    z-index: 6;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(3rem, 8.6vw, 7.6rem);
+    line-height: 0.94;
+    letter-spacing: -0.04em;
+    color: var(--lp-text-strong);
+    pointer-events: none;
+    user-select: none;
+    margin: 0;
+  }
+
+  .lp-i-wrap {
+    position: relative;
+    display: inline-block;
+  }
+
+  .lp-i-dot {
+    position: absolute;
+    top: -0.14em;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 0.16em;
+    height: 0.16em;
+    border-radius: 2px;
+    background: var(--lp-accent);
+    box-shadow: 0 0 18px rgba(62, 224, 160, 0.75);
+  }
+
+  .lp-portrait-hub {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    z-index: 10;
+  }
+
+  .lp-portrait-inner {
+    position: relative;
+    z-index: 10;
+    width: clamp(230px, 31vw, 390px);
+    aspect-ratio: 1 / 1;
+    display: grid;
+    place-items: center;
+    transition: transform 260ms var(--ease-spring);
+  }
+
+  .lp-portrait-inner.is-poked {
+    transform: scale(1.055);
+  }
+
+  .lp-face-canvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: pointer;
+    border-radius: 9999px;
+    outline: none;
+  }
+
+  .lp-face-canvas:focus-visible {
+    box-shadow: 0 0 0 3px var(--lp-accent);
+  }
+
+  .lp-face-fallback {
+    position: absolute;
+    inset: 8%;
+    width: 84%;
+    height: 84%;
+    object-fit: cover;
+    object-position: center 20%;
+    border-radius: 9999px;
+    border: 2px solid rgba(62, 224, 160, 0.25);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 240ms ease;
+  }
+
+  .lp-face-fallback.is-visible {
+    opacity: 1;
+  }
+
+  .orbit-layer {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    display: grid;
+    place-items: center;
+  }
+
+  .orbit-pill {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    font-family: var(--font-mono);
+    font-size: clamp(0.68rem, 0.85vw, 0.78rem);
+    font-weight: 500;
+    color: var(--lp-text-strong);
+    background: rgba(14, 23, 38, 0.86);
+    border: 1px solid rgba(215, 226, 234, 0.16);
+    padding: 0.34rem 0.72rem;
+    border-radius: 9999px;
+    white-space: nowrap;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+    will-change: transform, opacity;
+  }
+
+  .lp-hero-bottom {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(215, 226, 234, 0.08);
+  }
+
+  .lp-hero-status {
+    max-width: 560px;
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .lp-status-line {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--lp-accent);
+    letter-spacing: 0.02em;
+  }
+
+  .lp-status-sq {
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    background: var(--lp-accent);
+    box-shadow: 0 0 10px rgba(62, 224, 160, 0.8);
+    flex-shrink: 0;
+  }
+
+  .lp-hero-bio {
+    margin: 0;
+    font-size: var(--text-sm);
+    color: var(--lp-text);
+    line-height: 1.6;
+  }
+
+  .lp-btn-mint {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.82rem 1.75rem;
+    border-radius: 9999px;
+    border: none;
+    background: var(--lp-accent);
+    color: #09101b;
+    font-family: var(--font-sans);
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 12px 28px -10px rgba(62, 224, 160, 0.55);
+    transition: transform 180ms var(--ease-spring), filter 180ms ease;
+  }
+
+  .lp-btn-mint:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.06);
+  }
+
+  @media (max-width: 900px) {
+    .lp-split-name {
+      flex-direction: column;
+      justify-content: space-between;
+      height: 100%;
+      font-size: clamp(2.8rem, 13vw, 4.4rem);
+      padding-block: 0.5rem;
+    }
+
+    .lp-portrait-inner {
+      width: clamp(210px, 54vw, 290px);
+    }
+  }
+</style>
+
+<script>
+  let cleanupHero: (() => void) | null = null;
+
+  function initLivingHero(): void {
+    cleanupHero?.();
+    const hero = document.querySelector<HTMLElement>('[data-living-hero]');
+    if (!hero) return;
+
+    const controller = new AbortController();
+    const { signal } = controller;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    let rafId = 0;
+
+    // 1. Background Dot-Grid & Matrix Pulse Canvas
+    const bgCanvas = hero.querySelector<HTMLCanvasElement>('[data-hero-bg]');
+    const bgCtx = bgCanvas?.getContext('2d') ?? null;
+
+    const resizeBg = () => {
+      if (!bgCanvas) return;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      bgCanvas.width = Math.floor(hero.clientWidth * dpr);
+      bgCanvas.height = Math.floor(hero.clientHeight * dpr);
+      if (bgCtx) bgCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    resizeBg();
+    window.addEventListener('resize', resizeBg, { signal });
+
+    // 2. 3D Orbiting Tech Pills
+    const pills = Array.from(hero.querySelectorAll<HTMLElement>('[data-orbit-pill]'));
+    const magnetInner = hero.querySelector<HTMLElement>('[data-magnet-inner]');
+
+    // 3. WebGL Living Portrait (4x3 Sprite Sheet Blender + Fallback)
+    const glCanvas = hero.querySelector<HTMLCanvasElement>('#faceGl');
+    const fallbackImg = hero.querySelector<HTMLImageElement>('[data-face-fallback]');
+
+    let pointerX = 0;
+    let pointerY = 0;
+    let smoothX = 0;
+    let smoothY = 0;
+    let currentCell = 0;
+    let prevCell = 0;
+    let mix = 1;
+    let reactionUntil = 0;
+    let reactionIndex = 0;
+    let blinkUntil = 0;
+    let nextBlinkAt = performance.now() + 3200;
+
+    const REACTION_CELLS = [10, 11]; // 10 = wink, 11 = sunglasses
+
+    window.addEventListener(
+      'pointermove',
+      (e) => {
+        const rect = hero.getBoundingClientRect();
+        const cx = rect.left + rect.width / 2;
+        const cy = rect.top + rect.height / 2;
+        pointerX = Math.max(-1, Math.min(1, (e.clientX - cx) / (rect.width * 0.45)));
+        pointerY = Math.max(-1, Math.min(1, (e.clientY - cy) / (rect.height * 0.45)));
+      },
+      { passive: true, signal }
+    );
+
+    const triggerPoke = () => {
+      const now = performance.now();
+      const target = REACTION_CELLS[reactionIndex % REACTION_CELLS.length];
+      reactionIndex += 1;
+      prevCell = currentCell;
+      currentCell = target;
+      mix = 0;
+      reactionUntil = now + 1350;
+      if (magnetInner) {
+        magnetInner.classList.add('is-poked');
+        window.setTimeout(() => magnetInner.classList.remove('is-poked'), 260);
+      }
+    };
+
+    glCanvas?.addEventListener('click', triggerPoke, { signal });
+    glCanvas?.addEventListener(
+      'keydown',
+      (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          triggerPoke();
+        }
+      },
+      { signal }
+    );
+
+    // Setup WebGL shader for 4x3 sprite blending
+    let gl: WebGLRenderingContext | null = null;
+    let uFromLoc: WebGLUniformLocation | null = null;
+    let uToLoc: WebGLUniformLocation | null = null;
+    let uMixLoc: WebGLUniformLocation | null = null;
+    let uTiltLoc: WebGLUniformLocation | null = null;
+    let textureReady = false;
+
+    if (glCanvas) {
+      gl = glCanvas.getContext('webgl', { alpha: true, antialias: true });
+      if (gl) {
+        const vsSrc = `
+          attribute vec2 aPos;
+          varying vec2 vUv;
+          void main() {
+            vUv = vec2(aPos.x * 0.5 + 0.5, 0.5 - aPos.y * 0.5);
+            gl_Position = vec4(aPos, 0.0, 1.0);
+          }
+        `;
+        const fsSrc = `
+          precision mediump float;
+          uniform sampler2D uTex;
+          uniform float uFrom;
+          uniform float uTo;
+          uniform float uMix;
+          uniform vec2 uTilt;
+          varying vec2 vUv;
+
+          vec2 cellUv(vec2 uv, float idx) {
+            float col = mod(idx, 4.0);
+            float row = floor(idx / 4.0);
+            vec2 inset = uv * 0.92 + 0.04;
+            return vec2((col + inset.x) / 4.0, (row + inset.y) / 3.0);
+          }
+
+          void main() {
+            vec2 centered = vUv - 0.5;
+            float dist = length(centered * vec2(1.06, 1.02));
+            float mask = smoothstep(0.49, 0.41, dist);
+            if (mask <= 0.001) discard;
+
+            vec2 warpedUv = clamp(vUv + uTilt * 0.018, 0.02, 0.98);
+            vec4 cFrom = texture2D(uTex, cellUv(warpedUv, uFrom));
+            vec4 cTo = texture2D(uTex, cellUv(warpedUv, uTo));
+            vec4 color = mix(cFrom, cTo, uMix);
+
+            // Subtle mint edge glow
+            float rim = smoothstep(0.38, 0.46, dist) * (1.0 - smoothstep(0.46, 0.49, dist));
+            color.rgb += vec3(0.243, 0.878, 0.627) * rim * 0.35;
+
+            gl_FragColor = vec4(color.rgb, color.a * mask);
+          }
+        `;
+
+        const compile = (type: number, src: string) => {
+          const s = gl!.createShader(type)!;
+          gl!.shaderSource(s, src);
+          gl!.compileShader(s);
+          return s;
+        };
+
+        const prog = gl.createProgram()!;
+        gl.attachShader(prog, compile(gl.VERTEX_SHADER, vsSrc));
+        gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, fsSrc));
+        gl.linkProgram(prog);
+        gl.useProgram(prog);
+
+        const buf = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+        gl.bufferData(
+          gl.ARRAY_BUFFER,
+          new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]),
+          gl.STATIC_DRAW
+        );
+        const aPos = gl.getAttribLocation(prog, 'aPos');
+        gl.enableVertexAttribArray(aPos);
+        gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+        uFromLoc = gl.getUniformLocation(prog, 'uFrom');
+        uToLoc = gl.getUniformLocation(prog, 'uTo');
+        uMixLoc = gl.getUniformLocation(prog, 'uMix');
+        uTiltLoc = gl.getUniformLocation(prog, 'uTilt');
+
+        const spriteSrc = glCanvas.dataset.spriteSrc || '/portrait/spritesheet.png';
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          if (!gl || signal.aborted) return;
+          const tex = gl.createTexture();
+          gl.bindTexture(gl.TEXTURE_2D, tex);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+          textureReady = true;
+          fallbackImg?.classList.remove('is-visible');
+        };
+        img.onerror = () => {
+          fallbackImg?.classList.add('is-visible');
+        };
+        img.src = spriteSrc;
+      } else {
+        fallbackImg?.classList.add('is-visible');
+      }
+    }
+
+    function pickGazeCell(x: number, y: number): number {
+      const dead = 0.22;
+      const gx = Math.abs(x) < dead ? 0 : x > 0 ? 1 : -1;
+      const gy = Math.abs(y) < dead ? 0 : y > 0 ? 1 : -1;
+      if (gx === 0 && gy === 0) return 0; // neutral
+      if (gx === 0 && gy < 0) return 2; // up
+      if (gx === 0 && gy > 0) return 3; // down
+      if (gx < 0 && gy === 0) return 4; // left
+      if (gx > 0 && gy === 0) return 5; // right
+      if (gx < 0 && gy < 0) return 6; // upleft
+      if (gx > 0 && gy < 0) return 7; // upright
+      if (gx < 0 && gy > 0) return 8; // downleft
+      return 9; // downright
+    }
+
+    const tick = (now: number) => {
+      if (signal.aborted) return;
+
+      // Smooth pointer tracking
+      smoothX += (pointerX - smoothX) * 0.1;
+      smoothY += (pointerY - smoothY) * 0.1;
+
+      // Background dot-grid + subtle radar pulse
+      if (bgCtx && bgCanvas) {
+        const w = hero.clientWidth;
+        const h = hero.clientHeight;
+        bgCtx.clearRect(0, 0, w, h);
+
+        const gap = 28;
+        const pulseR = ((now * 0.06) % Math.max(w, h) * 0.85);
+        const cx = w * 0.5;
+        const cy = h * 0.46;
+
+        for (let y = 14; y < h; y += gap) {
+          for (let x = 14; x < w; x += gap) {
+            const dx = x - cx;
+            const dy = y - cy;
+            const dist = Math.hypot(dx, dy);
+            const ring = Math.max(0, 1 - Math.abs(dist - pulseR) / 90);
+            if (ring > 0.15 && !reduceMotion) {
+              bgCtx.fillStyle = `rgba(62, 224, 160, ${(0.06 + ring * 0.22).toFixed(3)})`;
+              bgCtx.fillRect(x, y, 2, 2);
+            } else {
+              bgCtx.fillStyle = 'rgba(215, 226, 234, 0.09)';
+              bgCtx.fillRect(x, y, 1.5, 1.5);
+            }
+          }
+        }
+      }
+
+      // 3D Orbiting Tech Pills
+      if (pills.length > 0) {
+        const t = reduceMotion ? 0.8 : now * 0.00028;
+        const rx = Math.min(hero.clientWidth * 0.34, 340);
+        const ry = Math.min(hero.clientHeight * 0.15, 118);
+
+        pills.forEach((pill, i) => {
+          const angle = t + (i / pills.length) * Math.PI * 2;
+          const x = Math.cos(angle) * rx;
+          const z = Math.sin(angle); // -1 back, +1 front
+          const y = z * ry + Math.sin(angle * 2) * 10;
+          const scale = 0.78 + (z + 1) * 0.16;
+          const opacity = 0.34 + (z + 1) * 0.33;
+          pill.style.transform = `translate3d(calc(-50% + ${x.toFixed(1)}px), calc(-50% + ${y.toFixed(1)}px), 0) scale(${scale.toFixed(3)})`;
+          pill.style.opacity = opacity.toFixed(3);
+          pill.style.zIndex = z > 0 ? '15' : '5';
+        });
+      }
+
+      // Living Portrait State Machine (Reaction -> Blink -> 8-way Gaze)
+      if (!reduceMotion && now > reactionUntil) {
+        if (now >= nextBlinkAt) {
+          blinkUntil = now + 150;
+          nextBlinkAt = now + 3400 + Math.random() * 2800;
+        }
+        const desiredCell = now < blinkUntil ? 1 : pickGazeCell(smoothX, smoothY);
+        if (desiredCell !== currentCell) {
+          prevCell = currentCell;
+          currentCell = desiredCell;
+          mix = 0;
+        }
+      }
+
+      mix = Math.min(1, mix + 0.16);
+
+      if (gl && textureReady) {
+        gl.viewport(0, 0, glCanvas!.width, glCanvas!.height);
+        gl.clearColor(0, 0, 0, 0);
+        gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.uniform1f(uFromLoc, prevCell);
+        gl.uniform1f(uToLoc, currentCell);
+        gl.uniform1f(uMixLoc, mix);
+        gl.uniform2f(uTiltLoc, -smoothX, -smoothY);
+        gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+      }
+
+      rafId = window.requestAnimationFrame(tick);
+    };
+
+    rafId = window.requestAnimationFrame(tick);
+
+    cleanupHero = () => {
+      controller.abort();
+      window.cancelAnimationFrame(rafId);
+    };
+  }
+
+  document.addEventListener('astro:page-load', initLivingHero);
+</script>

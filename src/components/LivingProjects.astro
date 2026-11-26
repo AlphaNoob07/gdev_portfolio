@@ -1,0 +1,424 @@
+---
+import type { ProjectEntry } from '../lib/content';
+
+interface Props {
+  projects: ProjectEntry[];
+}
+
+const { projects } = Astro.props;
+const featured = projects.filter((p) => p.data.featured).slice(0, 6);
+const displayProjects = featured.length > 0 ? featured : projects.slice(0, 6);
+---
+
+<section id="projects" class="lp-projects reveal">
+  <div class="lp-container">
+    <div class="lp-section-head">
+      <span class="lp-eyebrow">Selected Work</span>
+      <h2 class="lp-h2">Featured Projects</h2>
+    </div>
+
+    <div class="lp-projects-stack">
+      {
+        displayProjects.map((project, index) => {
+          const { data } = project;
+          const highlights = [
+            ...(data.caseStudy?.solutions ?? []),
+            ...(data.caseStudy?.outcomes ?? []),
+            ...(data.caseStudy?.objectives ?? []),
+          ].slice(0, 4);
+          const sysName = `${project.id.replace(/[^a-z0-9-]/gi, '')}.production.sys`;
+
+          return (
+            <article class="lp-project-card" id={`project-${project.id}`}>
+              <div class="lp-project-main">
+                <div class="lp-project-meta">
+                  <span class="lp-domain-badge">{data.categories[0] ?? 'XR'}</span>
+                  {data.year && <span class="lp-project-year">{data.year}</span>}
+                  {data.confidentiality === 'generic-only' && (
+                    <span class="lp-generic-pill">Generic overview</span>
+                  )}
+                </div>
+
+                <h3 class="lp-project-title">
+                  <a href={`/projects/${project.id}`}>{data.title}</a>
+                </h3>
+                <p class="lp-project-summary">{data.summary}</p>
+
+                {highlights.length > 0 && (
+                  <div class="lp-project-bullets">
+                    <span class="lp-bullets-label">Key Architecture &amp; Delivery</span>
+                    <ul>
+                      {highlights.map((item) => (
+                        <li>{item}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+
+                <div class="lp-project-tech">
+                  {data.tech.map((t) => (
+                    <span class="lp-tech-pill">{t}</span>
+                  ))}
+                </div>
+
+                <div class="lp-project-links">
+                  <a href={`/projects/${project.id}`} class="lp-case-link">
+                    View Case Study &rarr;
+                  </a>
+                  {data.links?.live && (
+                    <a
+                      href={data.links.live}
+                      target="_blank"
+                      rel="noopener"
+                      class="lp-ext-link"
+                    >
+                      Live Demo &#8599;
+                    </a>
+                  )}
+                  {data.links?.repo && (
+                    <a
+                      href={data.links.repo}
+                      target="_blank"
+                      rel="noopener"
+                      class="lp-ext-link"
+                    >
+                      GitHub &#8599;
+                    </a>
+                  )}
+                </div>
+              </div>
+
+              <div class="lp-terminal" aria-hidden="true">
+                <div class="lp-term-bar">
+                  <div class="lp-term-dots">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                  </div>
+                  <span class="lp-term-title">{sysName}</span>
+                </div>
+                <div class="lp-term-body">
+                  <div class="lp-term-line">
+                    <span class="lp-term-prompt">$</span>
+                    <span>inspect --module 0{index + 1} --target {data.categories.join('/')}</span>
+                  </div>
+                  <div class="lp-term-kv">
+                    <span>ENGINE / STACK</span>
+                    <strong>{data.tech.slice(0, 3).join(' · ')}</strong>
+                  </div>
+                  <div class="lp-term-kv">
+                    <span>ROLE</span>
+                    <strong>{data.role || 'XR & Game Developer'}</strong>
+                  </div>
+                  <div class="lp-term-kv">
+                    <span>PIPELINE</span>
+                    <strong>Real-Time 3D · Optimized Build</strong>
+                  </div>
+                </div>
+                <div class="lp-term-foot">
+                  <span class="lp-term-dot"></span>
+                  <span>Status: Active Production &middot; Verified</span>
+                </div>
+              </div>
+            </article>
+          );
+        })
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .lp-projects {
+    background: var(--lp-bg);
+    padding-block: clamp(4.5rem, 8vw, 7rem);
+  }
+
+  .lp-container {
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-inline: clamp(1.25rem, 4vw, 2.5rem);
+  }
+
+  .lp-section-head {
+    margin-bottom: clamp(2.25rem, 4.5vw, 3.5rem);
+  }
+
+  .lp-eyebrow {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--lp-accent);
+    margin-bottom: 0.65rem;
+  }
+
+  .lp-h2 {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4.2vw, 3.35rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--lp-text-strong);
+    margin: 0;
+  }
+
+  .lp-projects-stack {
+    display: grid;
+    gap: clamp(1.5rem, 3vw, 2.25rem);
+  }
+
+  .lp-project-card {
+    background: var(--lp-surface);
+    border: 1px solid var(--lp-border);
+    border-radius: 24px;
+    padding: clamp(1.5rem, 3.5vw, 2.5rem);
+    display: grid;
+    grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.95fr);
+    gap: clamp(1.5rem, 3vw, 2.5rem);
+    align-items: center;
+    transition: border-color 220ms ease;
+  }
+
+  .lp-project-card:hover {
+    border-color: rgba(62, 224, 160, 0.32);
+  }
+
+  .lp-project-main {
+    display: grid;
+    gap: 1rem;
+  }
+
+  .lp-project-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.65rem;
+  }
+
+  .lp-domain-badge {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--lp-accent);
+    background: var(--lp-accent-dim);
+    border: 1px solid rgba(62, 224, 160, 0.28);
+    padding: 0.26rem 0.68rem;
+    border-radius: 9999px;
+  }
+
+  .lp-project-year,
+  .lp-generic-pill {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--lp-text-muted);
+  }
+
+  .lp-project-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.45rem, 2.6vw, 2rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  .lp-project-title a {
+    color: var(--lp-text-strong);
+    text-decoration: none;
+    transition: color 180ms ease;
+  }
+
+  .lp-project-title a:hover {
+    color: var(--lp-accent);
+  }
+
+  .lp-project-summary {
+    margin: 0;
+    color: var(--lp-text);
+    font-size: var(--text-base);
+    line-height: 1.65;
+  }
+
+  .lp-project-bullets {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .lp-bullets-label {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--lp-text-muted);
+  }
+
+  .lp-project-bullets ul {
+    margin: 0;
+    padding-left: 1.1rem;
+    display: grid;
+    gap: 0.4rem;
+    color: var(--lp-text);
+    font-size: var(--text-sm);
+    line-height: 1.55;
+  }
+
+  .lp-project-bullets li::marker {
+    color: var(--lp-accent);
+  }
+
+  .lp-project-tech {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+  }
+
+  .lp-tech-pill {
+    font-family: var(--font-mono);
+    font-size: 0.74rem;
+    color: var(--lp-text);
+    background: rgba(14, 23, 38, 0.75);
+    border: 1px solid var(--lp-border);
+    padding: 0.28rem 0.68rem;
+    border-radius: 9999px;
+  }
+
+  .lp-project-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding-top: 0.35rem;
+  }
+
+  .lp-case-link {
+    font-family: var(--font-mono);
+    font-size: 0.84rem;
+    font-weight: 600;
+    color: var(--lp-accent);
+    text-decoration: none;
+  }
+
+  .lp-case-link:hover {
+    text-decoration: underline;
+  }
+
+  .lp-ext-link {
+    font-family: var(--font-mono);
+    font-size: 0.84rem;
+    color: var(--lp-text);
+    text-decoration: none;
+  }
+
+  .lp-ext-link:hover {
+    color: var(--lp-accent);
+  }
+
+  /* Embedded Terminal / System Status Mockup */
+  .lp-terminal {
+    background: #09101b;
+    border: 1px solid var(--lp-border);
+    border-radius: 16px;
+    overflow: hidden;
+    font-family: var(--font-mono);
+    box-shadow: 0 18px 36px -16px rgba(0, 0, 0, 0.6);
+  }
+
+  .lp-term-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.7rem 1rem;
+    background: rgba(215, 226, 234, 0.04);
+    border-bottom: 1px solid var(--lp-border);
+  }
+
+  .lp-term-dots {
+    display: flex;
+    gap: 6px;
+  }
+
+  .lp-term-dots span {
+    width: 9px;
+    height: 9px;
+    border-radius: 9999px;
+    background: rgba(215, 226, 234, 0.22);
+  }
+
+  .lp-term-dots span:first-child {
+    background: #f87171;
+  }
+
+  .lp-term-dots span:nth-child(2) {
+    background: #fbbf24;
+  }
+
+  .lp-term-dots span:nth-child(3) {
+    background: #3ee0a0;
+  }
+
+  .lp-term-title {
+    font-size: 0.72rem;
+    color: var(--lp-text-muted);
+  }
+
+  .lp-term-body {
+    padding: 1.15rem 1rem;
+    display: grid;
+    gap: 0.85rem;
+    font-size: 0.76rem;
+  }
+
+  .lp-term-line {
+    display: flex;
+    gap: 0.5rem;
+    color: var(--lp-text);
+    word-break: break-word;
+  }
+
+  .lp-term-prompt {
+    color: var(--lp-accent);
+  }
+
+  .lp-term-kv {
+    display: grid;
+    gap: 0.2rem;
+    padding-left: 0.75rem;
+    border-left: 2px solid rgba(62, 224, 160, 0.35);
+  }
+
+  .lp-term-kv span {
+    font-size: 0.66rem;
+    color: var(--lp-text-muted);
+    letter-spacing: 0.06em;
+  }
+
+  .lp-term-kv strong {
+    color: var(--lp-text-strong);
+    font-weight: 500;
+  }
+
+  .lp-term-foot {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.65rem 1rem;
+    background: rgba(62, 224, 160, 0.06);
+    border-top: 1px solid var(--lp-border);
+    font-size: 0.72rem;
+    color: var(--lp-accent);
+  }
+
+  .lp-term-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 9999px;
+    background: var(--lp-accent);
+    box-shadow: 0 0 8px rgba(62, 224, 160, 0.85);
+  }
+
+  @media (max-width: 920px) {
+    .lp-project-card {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

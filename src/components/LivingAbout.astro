@@ -1,0 +1,318 @@
+---
+import type { ProfileData, SkillsData } from '../lib/content';
+
+interface Props {
+  profile: ProfileData;
+  skills: SkillsData;
+}
+
+const { profile, skills } = Astro.props;
+
+const metrics = [
+  { value: '10+', label: 'Years Experience' },
+  { value: '15+', label: 'Shipped XR & Game Projects' },
+  { value: '4+', label: 'Engines & XR Platforms' },
+  { value: '100%', label: 'Lifecycle Ownership' },
+];
+
+const stackCards = skills.categories.slice(0, 4);
+---
+
+<section id="about" class="lp-section lp-about reveal">
+  <div class="lp-container">
+    <div class="lp-section-head">
+      <span class="lp-eyebrow">Profile &amp; Technical Capabilities</span>
+      <h2 class="lp-h2">About {profile.name.split(' ')[0]}</h2>
+    </div>
+
+    <div class="lp-about-grid">
+      <div class="lp-about-bio">
+        {profile.about.map((paragraph) => <p class="lp-prose">{paragraph}</p>)}
+
+        <div class="lp-contact-pills">
+          <span class="lp-info-pill">{profile.location}</span>
+          <a class="lp-info-pill" href={`mailto:${profile.email}`}>
+            {profile.email}
+          </a>
+          <a
+            class="lp-info-pill"
+            href={profile.links.github}
+            target="_blank"
+            rel="noopener"
+          >
+            github.com/{profile.githubUsername}
+          </a>
+        </div>
+
+        <div class="lp-about-actions">
+          <a
+            href="/resume/Swapon-Islam-Resume.pdf"
+            class="lp-btn-outline"
+            download="Swapon-Islam-Resume.pdf"
+          >
+            Download CV (PDF)
+          </a>
+          <button type="button" class="lp-btn-mint" data-open-contact>
+            Contact me
+          </button>
+        </div>
+      </div>
+
+      <div class="lp-metrics-grid">
+        {
+          metrics.map((m) => (
+            <div class="lp-metric-card">
+              <span class="lp-metric-val">{m.value}</span>
+              <span class="lp-metric-label">{m.label}</span>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+
+    <div class="lp-stack-block">
+      <h3 class="lp-stack-heading">Technical Stack &amp; Tooling</h3>
+      <div class="lp-stack-grid">
+        {
+          stackCards.map((cat) => (
+            <div class="lp-stack-card">
+              <h4 class="lp-stack-cat">{cat.label}</h4>
+              <div class="lp-stack-pills">
+                {cat.skills.map((skill) => (
+                  <span class="lp-check-pill">
+                    <span class="lp-check-mark" aria-hidden="true">&#10003;</span>
+                    {skill.name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .lp-section {
+    background: var(--lp-bg);
+    padding-block: clamp(4.5rem, 8vw, 7rem);
+  }
+
+  .lp-container {
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-inline: clamp(1.25rem, 4vw, 2.5rem);
+  }
+
+  .lp-section-head {
+    margin-bottom: clamp(2rem, 4vw, 3.25rem);
+  }
+
+  .lp-eyebrow {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--lp-accent);
+    margin-bottom: 0.65rem;
+  }
+
+  .lp-h2 {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 4.2vw, 3.35rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--lp-text-strong);
+    margin: 0;
+  }
+
+  .lp-about-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    gap: clamp(1.75rem, 4vw, 3.5rem);
+    align-items: start;
+  }
+
+  .lp-about-bio {
+    display: grid;
+    gap: 1.15rem;
+  }
+
+  .lp-prose {
+    margin: 0;
+    color: var(--lp-text);
+    font-size: var(--text-base);
+    line-height: 1.75;
+  }
+
+  .lp-contact-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    margin-top: 0.35rem;
+  }
+
+  .lp-info-pill {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--lp-text);
+    background: rgba(215, 226, 234, 0.05);
+    border: 1px solid var(--lp-border);
+    padding: 0.42rem 0.85rem;
+    border-radius: 9999px;
+    text-decoration: none;
+    transition: border-color 180ms ease, color 180ms ease;
+  }
+
+  a.lp-info-pill:hover {
+    border-color: var(--lp-accent);
+    color: var(--lp-accent);
+  }
+
+  .lp-about-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    margin-top: 0.5rem;
+  }
+
+  .lp-btn-mint {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.78rem 1.55rem;
+    border-radius: 9999px;
+    border: none;
+    background: var(--lp-accent);
+    color: #09101b;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: transform 180ms var(--ease-spring), filter 180ms ease;
+  }
+
+  .lp-btn-mint:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.06);
+  }
+
+  .lp-btn-outline {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.78rem 1.55rem;
+    border-radius: 9999px;
+    border: 1px solid var(--lp-border-strong);
+    background: transparent;
+    color: var(--lp-text-strong);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+    transition: border-color 180ms ease, color 180ms ease;
+  }
+
+  .lp-btn-outline:hover {
+    border-color: var(--lp-accent);
+    color: var(--lp-accent);
+  }
+
+  .lp-metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem;
+  }
+
+  .lp-metric-card {
+    background: var(--lp-surface);
+    border: 1px solid var(--lp-border);
+    border-radius: 20px;
+    padding: clamp(1.25rem, 2.5vw, 1.85rem);
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  .lp-metric-val {
+    font-family: var(--font-display);
+    font-size: clamp(2rem, 3.6vw, 2.9rem);
+    font-weight: 800;
+    color: var(--lp-accent);
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+
+  .lp-metric-label {
+    font-size: var(--text-sm);
+    color: var(--lp-text);
+    font-weight: 500;
+  }
+
+  .lp-stack-block {
+    margin-top: clamp(3rem, 5vw, 4.5rem);
+  }
+
+  .lp-stack-heading {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--lp-text-strong);
+    margin: 0 0 1.25rem;
+  }
+
+  .lp-stack-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.15rem;
+  }
+
+  .lp-stack-card {
+    background: var(--lp-surface);
+    border: 1px solid var(--lp-border);
+    border-radius: 20px;
+    padding: 1.4rem;
+    display: grid;
+    gap: 0.9rem;
+    align-content: start;
+  }
+
+  .lp-stack-cat {
+    margin: 0;
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--lp-text-muted);
+  }
+
+  .lp-stack-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+
+  .lp-check-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.38rem;
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    color: var(--lp-text-strong);
+    background: rgba(14, 23, 38, 0.75);
+    border: 1px solid var(--lp-border);
+    padding: 0.34rem 0.72rem;
+    border-radius: 9999px;
+  }
+
+  .lp-check-mark {
+    color: var(--lp-accent);
+    font-weight: 700;
+  }
+
+  @media (max-width: 860px) {
+    .lp-about-grid,
+    .lp-stack-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

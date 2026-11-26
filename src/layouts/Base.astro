@@ -5,11 +5,12 @@ import '../styles/glass.css';
 import '../styles/base.css';
 import '../styles/print.css';
 import { ClientRouter } from 'astro:transitions';
-import NavBar from '../components/NavBar.astro';
-import GlassPanel from '../components/GlassPanel.astro';
-import StatsPanel from '../components/StatsPanel.astro';
+import LivingNav from '../components/LivingNav.astro';
+import LivingFooter from '../components/LivingFooter.astro';
+import ContactModal from '../components/ContactModal.astro';
+import ScrollAvatar from '../components/ScrollAvatar.astro';
 import Assistant from '../components/Assistant.astro';
-import { getBlogPosts, getProfile } from '../lib/content';
+import { getProfile } from '../lib/content';
 
 interface Props {
   title?: string;
@@ -21,10 +22,7 @@ interface Props {
   jsonLd?: Record<string, unknown> | Array<Record<string, unknown>>;
 }
 
-const [profile, blogPosts] = await Promise.all([
-  getProfile(),
-  getBlogPosts(),
-]);
+const profile = await getProfile();
 
 const {
   title = `${profile.name} — ${profile.headline}`,
@@ -39,7 +37,6 @@ const {
 const siteBase = Astro.site ?? new URL(Astro.url.origin);
 const canonicalUrl = new URL(canonicalPath, siteBase).toString();
 const ogImageUrl = new URL(ogImage, siteBase).toString();
-const hasBlogPosts = blogPosts.length > 0;
 const umamiWebsiteId = import.meta.env.PUBLIC_UMAMI_WEBSITE_ID?.trim();
 
 const personSchema: Record<string, unknown> = {
@@ -67,7 +64,7 @@ const structuredData = jsonLd
 ---
 
 <!doctype html>
-<html lang={profile.i18n.defaultLocale}>
+<html lang={profile.i18n.defaultLocale} data-theme="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -77,7 +74,14 @@ const structuredData = jsonLd
     <link rel="canonical" href={canonicalUrl} />
     {noindex && <meta name="robots" content="noindex, nofollow" />}
 
-    <meta name="theme-color" content="#0b0c10" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&family=Schibsted+Grotesk:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <meta name="theme-color" content="#0E1726" />
     <meta property="og:site_name" content={profile.name} />
     <meta property="og:type" content={ogType} />
     <meta property="og:title" content={title} />
@@ -92,32 +96,13 @@ const structuredData = jsonLd
 
     <script is:inline>
       (() => {
-        const resolveTheme = () => {
-          try {
-            const stored = window.localStorage.getItem('theme');
-            if (stored === 'dark' || stored === 'light') return stored;
-          } catch {
-            // Ignore storage access failures
-          }
-          return window.matchMedia('(prefers-color-scheme: light)').matches
-            ? 'light'
-            : 'dark';
-        };
-
-        const applyInitialTheme = (root) => {
-          const theme = resolveTheme();
-          root.dataset.theme = theme;
+        const initRoot = (root) => {
+          root.dataset.theme = 'dark';
           root.classList.add('js-ready');
-          const meta = document.querySelector('meta[name="theme-color"]');
-          if (meta) {
-            meta.setAttribute('content', theme === 'light' ? '#f5f7fc' : '#0b0c10');
-          }
         };
-
-        applyInitialTheme(document.documentElement);
-
+        initRoot(document.documentElement);
         document.addEventListener('astro:before-swap', (event) => {
-          applyInitialTheme(event.newDocument.documentElement);
+          initRoot(event.newDocument.documentElement);
         });
       })();
     </script>
@@ -144,153 +129,69 @@ const structuredData = jsonLd
   <body>
     <a href="#main-content" class="skip-link">Skip to main content</a>
 
-    <div class="ambient-env" aria-hidden="true">
-      <div class="ambient-orb ambient-orb--1"></div>
-      <div class="ambient-orb ambient-orb--2"></div>
-      <div class="ambient-orb ambient-orb--3"></div>
-    </div>
-
-    <NavBar showBlog={hasBlogPosts} brandName={profile.name} />
+    <LivingNav />
 
     <main id="main-content" class="site-main">
       <slot />
     </main>
 
-    <footer class="site-footer">
-      <div class="container">
-        <GlassPanel variant="panel" padding="md">
-          <div class="footer-inner">
-            <div class="footer-meta">
-              <p>
-                <strong>{profile.name}</strong> · {profile.location}
-              </p>
-              <p>&copy; {new Date().getFullYear()} {profile.name}. Built with Astro &amp; Liquid Glass.</p>
-            </div>
-            <StatsPanel />
-            <div class="footer-links">
-              <a class="chip" href={profile.links.github} target="_blank" rel="noopener">
-                GitHub
-              </a>
-              <a class="chip" href={profile.links.linkedin} target="_blank" rel="noopener">
-                LinkedIn
-              </a>
-              <a class="chip" href={`mailto:${profile.email}`}>
-                {profile.email}
-              </a>
-            </div>
-          </div>
-        </GlassPanel>
-      </div>
-    </footer>
+    <LivingFooter profile={profile} />
 
+    {!noindex && <ContactModal profile={profile} />}
+    {!noindex && <ScrollAvatar />}
     {!noindex && <Assistant />}
 
     <script>
       let cleanupEffects: (() => void) | null = null;
 
-      function trackUmamiEvent(
-        name: string,
-        data?: Record<string, string>
-      ): void {
-        const umami = (
-          window as unknown as {
-            umami?: { track?: (n: string, d?: Record<string, string>) => void };
-          }
-        ).umami;
-        if (typeof umami?.track === 'function') {
-          umami.track(name, data);
-        }
-      }
-
-      function initGlassEffects(): void {
+      function initLivingEffects(): void {
         cleanupEffects?.();
         const controller = new AbortController();
         const { signal } = controller;
 
-        const prefersReducedMotion = window.matchMedia(
-          '(prefers-reduced-motion: reduce)'
-        ).matches;
-
-        // Scroll reveals
+        // Scroll-triggered section reveals
         const revealEls = Array.from(document.querySelectorAll<HTMLElement>('.reveal'));
-        let revealObserver: IntersectionObserver | null = null;
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        let observer: IntersectionObserver | null = null;
 
-        if (prefersReducedMotion || !('IntersectionObserver' in window)) {
+        if (reduceMotion || !('IntersectionObserver' in window)) {
           revealEls.forEach((el) => el.classList.add('is-visible'));
-        } else if (revealEls.length > 0) {
-          revealObserver = new IntersectionObserver(
+        } else {
+          observer = new IntersectionObserver(
             (entries) => {
               entries.forEach((entry) => {
                 if (entry.isIntersecting) {
                   entry.target.classList.add('is-visible');
-                  revealObserver?.unobserve(entry.target);
+                  observer?.unobserve(entry.target);
                 }
               });
             },
-            { threshold: 0.08, rootMargin: '0px 0px -32px 0px' }
+            { threshold: 0.08, rootMargin: '0px 0px -40px 0px' }
           );
-          revealEls.forEach((el) => revealObserver?.observe(el));
+          revealEls.forEach((el) => observer?.observe(el));
         }
 
-        // Section & project analytics events
-        const seenSections = new Set<string>();
-        const sectionEls = Array.from(
-          document.querySelectorAll<HTMLElement>('section[id]')
+        // Open Contact Modal from any [data-open-contact] trigger
+        document.addEventListener(
+          'click',
+          (event) => {
+            const target = (event.target as HTMLElement | null)?.closest<HTMLElement>(
+              '[data-open-contact]'
+            );
+            if (!target) return;
+            event.preventDefault();
+            window.dispatchEvent(new CustomEvent('lp:open-contact'));
+          },
+          { signal }
         );
-        let sectionObserver: IntersectionObserver | null = null;
-
-        if (sectionEls.length > 0 && 'IntersectionObserver' in window) {
-          sectionObserver = new IntersectionObserver(
-            (entries) => {
-              entries.forEach((entry) => {
-                if (entry.isIntersecting && !seenSections.has(entry.target.id)) {
-                  seenSections.add(entry.target.id);
-                  trackUmamiEvent('section_view', { section: entry.target.id });
-                }
-              });
-            },
-            { threshold: 0.35 }
-          );
-          sectionEls.forEach((sec) => sectionObserver?.observe(sec));
-        }
-
-        const caseStudyEl = document.querySelector<HTMLElement>('[data-project-slug]');
-        if (caseStudyEl?.dataset.projectSlug) {
-          trackUmamiEvent('project_view', {
-            project: caseStudyEl.dataset.projectSlug,
-          });
-        }
-
-        // Pointer spotlight for interactive glass panels
-        if (
-          !prefersReducedMotion &&
-          window.matchMedia('(hover: hover) and (pointer: fine)').matches
-        ) {
-          document
-            .querySelectorAll<HTMLElement>('[data-spotlight="true"]')
-            .forEach((panel) => {
-              panel.addEventListener(
-                'pointermove',
-                (event) => {
-                  const rect = panel.getBoundingClientRect();
-                  const x = event.clientX - rect.left;
-                  const y = event.clientY - rect.top;
-                  panel.style.setProperty('--spot-x', `${x}px`);
-                  panel.style.setProperty('--spot-y', `${y}px`);
-                },
-                { signal }
-              );
-            });
-        }
 
         cleanupEffects = () => {
-          revealObserver?.disconnect();
-          sectionObserver?.disconnect();
           controller.abort();
+          observer?.disconnect();
         };
       }
 
-      document.addEventListener('astro:page-load', initGlassEffects);
+      document.addEventListener('astro:page-load', initLivingEffects);
     </script>
   </body>
 </html>

@@ -1,0 +1,194 @@
+---
+const services = [
+  {
+    num: '01',
+    tag: 'Spatial Computing',
+    title: 'SPATIAL COMPUTING & AR/VR ARCHITECTURE',
+    desc: 'End-to-end mixed reality and virtual reality applications for Meta Quest, Android XR, AR glasses, and mobile ARCore/ARKit with rock-solid frame pacing.',
+    tags: ['Unity', 'Unreal Engine 5', 'OpenXR', 'Meta Quest', 'Android XR', 'ARCore'],
+  },
+  {
+    num: '02',
+    tag: 'Medical & Enterprise',
+    title: 'MEDICAL & ENTERPRISE XR SIMULATIONS',
+    desc: 'Interactive 3D anatomy, surgical workflows, and clinical training simulations engineered for doctors, nurses, and high-precision industrial teams.',
+    tags: ['AR Anatomy', 'Surgical Sim', 'Spatial Calibration', '3D Interaction'],
+  },
+  {
+    num: '03',
+    tag: 'Game Engineering',
+    title: 'MULTIPLAYER & REAL-TIME GAME SYSTEMS',
+    desc: 'Scalable gameplay architecture, deterministic networking, real-time physics, and performance optimization across mobile, PC, and VR titles.',
+    tags: ['C#', 'C++', 'Photon', 'Mirror', 'Shaders', 'Optimization'],
+  },
+  {
+    num: '04',
+    tag: 'AI & Computer Vision',
+    title: 'AI, COMPUTER VISION & BODY SENSING',
+    desc: 'Real-time tactical analysis, on-device ONNX inference in Unity, virtual try-on fitting rooms, and Kinect/camera motion tracking pipelines.',
+    tags: ['Python', 'Computer Vision', 'ONNX', 'Unity Inference', 'Kinect'],
+  },
+  {
+    num: '05',
+    tag: 'R&D to Production',
+    title: 'PROTOTYPING TO SHIPPED PRODUCTION',
+    desc: 'Rapid technical validation, custom hardware SDK integration, and full lifecycle delivery from initial R&D demo to store-ready production builds.',
+    tags: ['Rapid R&D', 'Hardware SDKs', 'Cross-Platform', 'Technical Leadership'],
+  },
+];
+---
+
+<section id="services" class="lp-services reveal">
+  <div class="lp-services-inner">
+    <div class="lp-services-head">
+      <span class="lp-services-eyebrow">Expertise &amp; Capabilities</span>
+      <h2 class="lp-services-h2">What I Build</h2>
+    </div>
+
+    <div class="lp-services-list">
+      {
+        services.map((svc) => (
+          <article class="lp-service-row">
+            <div class="lp-service-num" aria-hidden="true">
+              {svc.num}
+            </div>
+            <div class="lp-service-body">
+              <span class="lp-service-tag">{svc.tag}</span>
+              <h3 class="lp-service-title">{svc.title}</h3>
+              <p class="lp-service-desc">{svc.desc}</p>
+              <div class="lp-service-tags">
+                {svc.tags.map((t) => (
+                  <span class="lp-light-pill">{t}</span>
+                ))}
+              </div>
+            </div>
+          </article>
+        ))
+      }
+    </div>
+  </div>
+</section>
+
+<style>
+  .lp-services {
+    background: var(--lp-light-bg);
+    color: var(--lp-light-text);
+    border-radius: 40px 40px 0 0;
+    padding-block: clamp(4.5rem, 8vw, 7rem);
+    position: relative;
+    z-index: 2;
+  }
+
+  @media (min-width: 768px) {
+    .lp-services {
+      border-radius: 60px 60px 0 0;
+    }
+  }
+
+  .lp-services-inner {
+    max-width: var(--container-max);
+    margin-inline: auto;
+    padding-inline: clamp(1.25rem, 4vw, 2.5rem);
+  }
+
+  .lp-services-head {
+    margin-bottom: clamp(2.5rem, 5vw, 4rem);
+  }
+
+  .lp-services-eyebrow {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #0e7a56;
+    font-weight: 600;
+    margin-bottom: 0.65rem;
+  }
+
+  .lp-services-h2 {
+    font-family: var(--font-display);
+    font-size: clamp(2.1rem, 4.5vw, 3.5rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--lp-light-text);
+    margin: 0;
+  }
+
+  .lp-services-list {
+    display: grid;
+  }
+
+  .lp-service-row {
+    display: grid;
+    grid-template-columns: clamp(64px, 11vw, 140px) minmax(0, 1fr);
+    gap: clamp(1rem, 3vw, 2.5rem);
+    padding-block: clamp(2rem, 4vw, 3rem);
+    border-top: 1px solid rgba(14, 23, 38, 0.12);
+    align-items: start;
+  }
+
+  .lp-service-num {
+    font-family: var(--font-display);
+    font-size: clamp(2.2rem, 4.5vw, 3.6rem);
+    font-weight: 800;
+    line-height: 1;
+    color: rgba(14, 23, 38, 0.16);
+    letter-spacing: -0.04em;
+  }
+
+  .lp-service-body {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .lp-service-tag {
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #0e7a56;
+    font-weight: 600;
+  }
+
+  .lp-service-title {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.3rem, 2.4vw, 1.9rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--lp-light-text);
+  }
+
+  .lp-service-desc {
+    margin: 0;
+    max-width: 68ch;
+    color: var(--lp-light-muted);
+    font-size: var(--text-base);
+    line-height: 1.65;
+  }
+
+  .lp-service-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    margin-top: 0.35rem;
+  }
+
+  .lp-light-pill {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--lp-light-text);
+    background: rgba(14, 23, 38, 0.05);
+    border: 1px solid rgba(14, 23, 38, 0.12);
+    padding: 0.32rem 0.72rem;
+    border-radius: 9999px;
+  }
+
+  @media (max-width: 640px) {
+    .lp-service-row {
+      grid-template-columns: 1fr;
+      gap: 0.75rem;
+    }
+  }
+</style>
