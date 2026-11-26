@@ -45,12 +45,14 @@ const orbitSkills = [
                 width="680"
                 height="680"
                 data-sprite-src="/portrait/spritesheet.jpg?v=2"
+                data-gear-src="/portrait/xr-gear.jpg?v=2"
                 data-fallback-src={profilePic.src}
                 role="button"
                 tabindex="0"
-                aria-label="Interactive portrait of Swapon Islam — drag left or right to stretch face, move cursor to track gaze, hover or click for reactions"
+                aria-label="Interactive portrait of Swapon Islam — drag to stretch face, click to cycle AR glasses and VR headsets"
               ></canvas>
               <span class="lp-face-props" id="faceProps" aria-hidden="true">
+                <span class="lp-gear-badge" data-gear-badge></span>
                 <svg id="faceHand" class="lp-face-hand" viewBox="0 0 32 32">
                   <path
                     class="hand-grab"
@@ -347,6 +349,31 @@ const orbitSkills = [
     z-index: 12;
   }
 
+  .lp-gear-badge {
+    position: absolute;
+    left: 50%;
+    bottom: 2%;
+    transform: translate(-50%, 6px);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #09101b;
+    background: var(--lp-accent);
+    padding: 0.24rem 0.68rem;
+    border-radius: 9999px;
+    white-space: nowrap;
+    box-shadow: 0 8px 20px rgba(62, 224, 160, 0.45);
+    opacity: 0;
+    transition: opacity 200ms ease, transform 220ms var(--ease-spring);
+  }
+
+  .lp-gear-badge.is-visible {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+
   .lp-face-hand {
     position: absolute;
     width: 36px;
@@ -594,6 +621,7 @@ const orbitSkills = [
     window.addEventListener('resize', resizeMatrix, { signal });
 
     const faceHand = hero.querySelector<SVGElement>('#faceHand');
+    const gearBadge = hero.querySelector<HTMLElement>('[data-gear-badge]');
 
     let pointerX = 0;
     let pointerY = 0;
@@ -607,9 +635,38 @@ const orbitSkills = [
     let reactionUntil = 0;
     let forcedCell = 0;
     let sunglassesUntil = 0;
+    let activeGearCell = 13; // Start showcase with XREAL AR Glasses!
+    let clickCycleIdx = 0;
+    let idleGearIdx = 0;
+    let idleGearUntil = 0;
+    let nextIdleGearAt = performance.now() + 5500;
     let blinkUntil = 0;
     let nextBlinkAt = performance.now() + 3400;
     let lastTime = performance.now();
+
+    // 12=Sunglasses, 13=XREAL AR Glasses, 14=Holo AR Glasses, 15=Meta Quest 3 VR, 16=Spatial XR Visor, 17=Compact XR Goggles
+    const GEAR_CELLS = [13, 12, 15, 16, 14, 17];
+    const CLICK_CYCLE = [13, 12, 15, 16, 14, 17, 9, 10];
+    const GEAR_LABELS: Record<number, string> = {
+      11: 'Sunglasses',
+      12: 'Sunglasses',
+      13: 'XREAL AR Glasses',
+      14: 'Waveguide AR HUD',
+      15: 'Meta Quest 3 VR',
+      16: 'Spatial XR Visor',
+      17: 'Compact XR Goggles',
+    };
+
+    const updateGearBadge = (cell: number) => {
+      if (!gearBadge) return;
+      const label = GEAR_LABELS[cell];
+      if (label) {
+        gearBadge.textContent = label;
+        gearBadge.classList.add('is-visible');
+      } else {
+        gearBadge.classList.remove('is-visible');
+      }
+    };
 
     // Drag & spring state
     let isDragging = false;
@@ -635,23 +692,32 @@ const orbitSkills = [
         currentCell = cell;
         currentFlip = flip;
         mix = 0;
+        updateGearBadge(cell);
       }
     };
 
-    // Expose window.triggerSunglasses matching reference site
+    // Expose window.triggerSunglasses matching reference site (cycles glasses & XR headsets!)
     (window as unknown as { triggerSunglasses?: (on: boolean, ms?: number) => void }).triggerSunglasses = (
       on: boolean,
       ms = 60000
     ) => {
-      sunglassesUntil = on ? performance.now() + ms : 0;
+      if (on) {
+        activeGearCell = GEAR_CELLS[idleGearIdx % GEAR_CELLS.length];
+        idleGearIdx += 1;
+        sunglassesUntil = performance.now() + ms;
+      } else {
+        sunglassesUntil = 0;
+      }
     };
 
-    // Trigger sunglasses when hovering primary Contact buttons
-    document.querySelectorAll<HTMLElement>('[data-open-contact]').forEach((btn) => {
+    // Trigger glasses / XR headsets when hovering primary CTA buttons
+    document.querySelectorAll<HTMLElement>('[data-open-contact], .lp-btn-ghost').forEach((btn) => {
       btn.addEventListener(
         'pointerenter',
         () => {
-          sunglassesUntil = Math.max(sunglassesUntil, performance.now() + 2400);
+          activeGearCell = GEAR_CELLS[idleGearIdx % GEAR_CELLS.length];
+          idleGearIdx += 1;
+          sunglassesUntil = Math.max(sunglassesUntil, performance.now() + 2600);
         },
         { signal }
       );
@@ -756,23 +822,12 @@ const orbitSkills = [
         forcedCell = 8;
         reactionUntil = now + 720;
         setExpression(8, 0);
-      } else if (finalDist < 8 && glCanvas) {
-        // Quick tap/click without drag -> region-based reaction matching reference!
-        const fRect = glCanvas.getBoundingClientRect();
-        const fy = (e.clientY - (fRect.top + fRect.height / 2)) / (fRect.height * 0.5);
-        if (fy < -0.14) {
-          forcedCell = 8; // upper brow -> angry
-          reactionUntil = now + 1100;
-          setExpression(8, 0);
-        } else if (fy < 0.22) {
-          forcedCell = 9; // nose/mouth -> tongue
-          reactionUntil = now + 1250;
-          setExpression(9, 0);
-        } else {
-          forcedCell = 10; // chin -> wink
-          reactionUntil = now + 1250;
-          setExpression(10, 0);
-        }
+      } else if (finalDist < 8) {
+        // Quick tap/click -> cycle through Sunglasses, AR Glasses, VR Headset, Spatial XR Visor, Tongue & Wink!
+        forcedCell = CLICK_CYCLE[clickCycleIdx % CLICK_CYCLE.length];
+        clickCycleIdx += 1;
+        reactionUntil = now + 2600;
+        setExpression(forcedCell, 0);
       } else {
         reactionUntil = 0;
       }
@@ -794,8 +849,11 @@ const orbitSkills = [
       { signal }
     );
 
-    // WebGL 4x3 Sprite Blender + Inner-Feature Rubber-Band Warp
+    // WebGL Dual-Texture Blender (4x3 Expressions + 2x2 XR/VR Headsets) + Rubber-Band Warp
     let gl: WebGLRenderingContext | null = null;
+    let uTexLoc: WebGLUniformLocation | null = null;
+    let uGearTexLoc: WebGLUniformLocation | null = null;
+    let uGearReadyLoc: WebGLUniformLocation | null = null;
     let uFromLoc: WebGLUniformLocation | null = null;
     let uToLoc: WebGLUniformLocation | null = null;
     let uFlipFromLoc: WebGLUniformLocation | null = null;
@@ -804,6 +862,7 @@ const orbitSkills = [
     let uTiltLoc: WebGLUniformLocation | null = null;
     let uDragLoc: WebGLUniformLocation | null = null;
     let textureReady = false;
+    let gearReady = false;
 
     if (glCanvas) {
       gl = glCanvas.getContext('webgl', { alpha: true, antialias: true });
@@ -819,6 +878,8 @@ const orbitSkills = [
         const fsSrc = `
           precision mediump float;
           uniform sampler2D uTex;
+          uniform sampler2D uGearTex;
+          uniform float uGearReady;
           uniform float uFrom;
           uniform float uTo;
           uniform float uFlipFrom;
@@ -828,36 +889,40 @@ const orbitSkills = [
           uniform vec2 uDrag;
           varying vec2 vUv;
 
-          vec2 cellUv(vec2 uv, float idx, float flipX) {
-            float col = mod(idx, 4.0);
-            float row = floor(idx / 4.0);
+          vec4 samplePose(vec2 uv, float idx, float flipX) {
+            if (idx >= 12.0 && uGearReady > 0.5) {
+              float gIdx = idx - 12.0;
+              float col = mod(gIdx, 3.0);
+              float row = floor(gIdx / 3.0);
+              vec2 inset = uv * 0.94 + 0.03;
+              return texture2D(uGearTex, vec2((col + inset.x) / 3.0, (row + inset.y) / 2.0));
+            }
+            float actualIdx = idx >= 12.0 ? 11.0 : idx;
+            float col = mod(actualIdx, 4.0);
+            float row = floor(actualIdx / 4.0);
             vec2 fuv = vec2(flipX > 0.5 ? (1.0 - uv.x) : uv.x, uv.y);
             vec2 inset = fuv * 0.94 + 0.03;
-            return vec2((col + inset.x) / 4.0, (row + inset.y) / 3.0);
+            return texture2D(uTex, vec2((col + inset.x) / 4.0, (row + inset.y) / 3.0));
           }
 
           void main() {
-            // Radial falloff: pulls inner facial features toward drag vector while keeping silhouette anchored
             float rDist = length(vUv - vec2(0.5, 0.52));
             float innerWeight = smoothstep(0.46, 0.06, rDist);
             vec2 dragShift = -uDrag * 0.165 * innerWeight * innerWeight;
             vec2 warpedUv = clamp(vUv + dragShift + uTilt * 0.008, 0.01, 0.99);
 
-            vec4 cFrom = texture2D(uTex, cellUv(warpedUv, uFrom, uFlipFrom));
-            vec4 cTo = texture2D(uTex, cellUv(warpedUv, uTo, uFlipTo));
+            vec4 cFrom = samplePose(warpedUv, uFrom, uFlipFrom);
+            vec4 cTo = samplePose(warpedUv, uTo, uFlipTo);
             float eased = uMix * uMix * (3.0 - 2.0 * uMix);
             vec4 color = mix(cFrom, cTo, eased);
 
-            // Key out the solid #0E1726 background so only the floating head renders
             vec3 bgCol = vec3(0.0549, 0.0902, 0.1490);
             float bgDist = distance(color.rgb, bgCol);
             float alpha = smoothstep(0.07, 0.17, bgDist);
-            // Protect face interior (e.g. dark sunglasses) from being keyed out
-            vec2 fc = (warpedUv - vec2(0.5, 0.52)) * vec2(1.3, 1.0);
-            alpha = max(alpha, smoothstep(0.28, 0.2, length(fc)));
-            // Despill navy fringe on hair edges
+            // Protect face & dark visor/sunglasses interior from chroma key
+            vec2 fc = (warpedUv - vec2(0.5, 0.50)) * vec2(1.18, 0.96);
+            alpha = max(alpha, smoothstep(0.32, 0.22, length(fc)));
             color.rgb = mix(bgCol, color.rgb, clamp(alpha * 1.2, 0.0, 1.0));
-            // Soft outer safety fade at very edge of canvas
             float edge = smoothstep(0.50, 0.45, length(vUv - 0.5));
             alpha *= edge;
             if (alpha <= 0.01) discard;
@@ -890,6 +955,9 @@ const orbitSkills = [
         gl.enableVertexAttribArray(aPos);
         gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
 
+        uTexLoc = gl.getUniformLocation(prog, 'uTex');
+        uGearTexLoc = gl.getUniformLocation(prog, 'uGearTex');
+        uGearReadyLoc = gl.getUniformLocation(prog, 'uGearReady');
         uFromLoc = gl.getUniformLocation(prog, 'uFrom');
         uToLoc = gl.getUniformLocation(prog, 'uTo');
         uFlipFromLoc = gl.getUniformLocation(prog, 'uFlipFrom');
@@ -897,12 +965,15 @@ const orbitSkills = [
         uMixLoc = gl.getUniformLocation(prog, 'uMix');
         uTiltLoc = gl.getUniformLocation(prog, 'uTilt');
         uDragLoc = gl.getUniformLocation(prog, 'uDrag');
+        gl.uniform1i(uTexLoc, 0);
+        gl.uniform1i(uGearTexLoc, 1);
 
-        const spriteSrc = glCanvas.dataset.spriteSrc || '/portrait/spritesheet.jpg';
+        const spriteSrc = glCanvas.dataset.spriteSrc || '/portrait/spritesheet.jpg?v=2';
         const img = new Image();
         img.crossOrigin = 'anonymous';
         img.onload = () => {
           if (!gl || signal.aborted) return;
+          gl.activeTexture(gl.TEXTURE0);
           const tex = gl.createTexture();
           gl.bindTexture(gl.TEXTURE_2D, tex);
           gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -917,6 +988,23 @@ const orbitSkills = [
           fallbackImg?.classList.add('is-visible');
         };
         img.src = spriteSrc;
+
+        const gearSrc = glCanvas.dataset.gearSrc || '/portrait/xr-gear.jpg?v=2';
+        const gearImg = new Image();
+        gearImg.crossOrigin = 'anonymous';
+        gearImg.onload = () => {
+          if (!gl || signal.aborted) return;
+          gl.activeTexture(gl.TEXTURE1);
+          const gTex = gl.createTexture();
+          gl.bindTexture(gl.TEXTURE_2D, gTex);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+          gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+          gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, gearImg);
+          gearReady = true;
+        };
+        gearImg.src = gearSrc;
       } else {
         fallbackImg?.classList.add('is-visible');
       }
@@ -1049,23 +1137,34 @@ const orbitSkills = [
         });
       }
 
-      // Living Portrait Expression State Machine (Drag -> Linger -> Sunglasses -> Hover Dwell -> Blink -> Gaze)
+      // Living Portrait Expression State Machine (Drag -> Click/Linger -> CTA Sunglasses -> Hover Dwell -> Periodic XR Gear Showcase -> Blink -> Gaze)
       if (isDragging) {
         // <= 52px = SHOCK (7), > 52px = ANGRY (8)
         setExpression(rawDragPx > 52 ? 8 : 7, 0);
       } else if (now < reactionUntil) {
         setExpression(forcedCell, 0);
       } else if (now < sunglassesUntil) {
-        setExpression(11, 0);
+        setExpression(activeGearCell, 0);
       } else if (!reduceMotion && dwellZone !== 'none' && now - dwellSince > 420) {
         setExpression(dwellZone === 'center' ? 9 : 10, 0);
       } else if (!reduceMotion) {
-        if (now >= nextBlinkAt) {
-          blinkUntil = now + 140;
-          nextBlinkAt = now + 3400 + Math.random() * 2600;
+        // Every ~8.5s when idle, briefly try on Sunglasses / AR Smart Glasses / VR Headset / Spatial XR Visor!
+        if (now >= nextIdleGearAt) {
+          activeGearCell = GEAR_CELLS[idleGearIdx % GEAR_CELLS.length];
+          idleGearIdx += 1;
+          idleGearUntil = now + 2400;
+          nextIdleGearAt = now + 8500 + Math.random() * 3500;
         }
-        const desired = now < blinkUntil ? { cell: 1, flip: 0 } : pickGaze(smoothX, smoothY);
-        setExpression(desired.cell, desired.flip);
+        if (now < idleGearUntil) {
+          setExpression(activeGearCell, 0);
+        } else {
+          if (now >= nextBlinkAt) {
+            blinkUntil = now + 140;
+            nextBlinkAt = now + 3400 + Math.random() * 2600;
+          }
+          const desired = now < blinkUntil ? { cell: 1, flip: 0 } : pickGaze(smoothX, smoothY);
+          setExpression(desired.cell, desired.flip);
+        }
       }
 
       mix = Math.min(1, mix + dt * 9.0);
@@ -1074,6 +1173,7 @@ const orbitSkills = [
         gl.viewport(0, 0, glCanvas!.width, glCanvas!.height);
         gl.clearColor(0, 0, 0, 0);
         gl.clear(gl.COLOR_BUFFER_BIT);
+        gl.uniform1f(uGearReadyLoc, gearReady ? 1 : 0);
         gl.uniform1f(uFromLoc, prevCell);
         gl.uniform1f(uToLoc, currentCell);
         gl.uniform1f(uFlipFromLoc, prevFlip);
