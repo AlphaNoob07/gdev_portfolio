@@ -1,25 +1,51 @@
 ---
+import { Picture } from 'astro:assets';
 import type { ProjectEntry } from '../lib/content';
+import { isImageMetadata, resolveProjectImage } from '../lib/media';
 
 interface Props {
   projects: ProjectEntry[];
 }
 
 const { projects } = Astro.props;
-const featured = projects.filter((p) => p.data.featured).slice(0, 6);
-const displayProjects = featured.length > 0 ? featured : projects.slice(0, 6);
+
+const filterCategories = ['XR', 'Games', 'AI'] as const;
+const categories = ['All', ...filterCategories] as const;
+const counts: Record<string, number> = { All: projects.length };
+for (const cat of filterCategories) {
+  counts[cat] = projects.filter((p) => p.data.categories.includes(cat)).length;
+}
 ---
 
-<section id="projects" class="lp-projects reveal">
+<section id="projects" class="lp-projects reveal" data-lp-projects>
   <div class="lp-container">
-    <div class="lp-section-head">
-      <span class="lp-eyebrow">Selected Work</span>
-      <h2 class="lp-h2">Featured Projects</h2>
+    <div class="lp-projects-top">
+      <div class="lp-section-head">
+        <span class="lp-eyebrow">Selected Work</span>
+        <h2 class="lp-h2">Featured Projects</h2>
+      </div>
+
+      <div class="lp-filter-bar" role="tablist" aria-label="Filter projects by category">
+        {
+          categories.map((cat, idx) => (
+            <button
+              type="button"
+              role="tab"
+              class:list={['lp-filter-btn', idx === 0 && 'is-active']}
+              aria-selected={idx === 0 ? 'true' : 'false'}
+              data-lp-filter={cat}
+            >
+              <span>{cat}</span>
+              <span class="lp-filter-count">{counts[cat] ?? 0}</span>
+            </button>
+          ))
+        }
+      </div>
     </div>
 
-    <div class="lp-projects-stack">
+    <div class="lp-projects-stack" data-lp-project-list>
       {
-        displayProjects.map((project, index) => {
+        projects.map((project, index) => {
           const { data } = project;
           const highlights = [
             ...(data.caseStudy?.solutions ?? []),
@@ -27,16 +53,22 @@ const displayProjects = featured.length > 0 ? featured : projects.slice(0, 6);
             ...(data.caseStudy?.objectives ?? []),
           ].slice(0, 4);
           const sysName = `${project.id.replace(/[^a-z0-9-]/gi, '')}.production.sys`;
+          const posterAsset = resolveProjectImage(data.poster);
+          const posterIsMetadata = isImageMetadata(posterAsset);
+          const posterStringUrl = typeof posterAsset === 'string' ? posterAsset : undefined;
+          const initiallyHidden = index >= 6;
 
           return (
-            <article class="lp-project-card" id={`project-${project.id}`}>
+            <article
+              class:list={['lp-project-card', initiallyHidden && 'is-collapsed']}
+              id={`project-${project.id}`}
+              data-lp-card
+              data-categories={data.categories.join(',')}
+            >
               <div class="lp-project-main">
                 <div class="lp-project-meta">
                   <span class="lp-domain-badge">{data.categories[0] ?? 'XR'}</span>
                   {data.year && <span class="lp-project-year">{data.year}</span>}
-                  {data.confidentiality === 'generic-only' && (
-                    <span class="lp-generic-pill">Generic overview</span>
-                  )}
                 </div>
 
                 <h3 class="lp-project-title">
@@ -88,8 +120,8 @@ const displayProjects = featured.length > 0 ? featured : projects.slice(0, 6);
                 </div>
               </div>
 
-              <div class="lp-terminal" aria-hidden="true">
-                <div class="lp-term-bar">
+              <div class="lp-terminal">
+                <div class="lp-term-bar" aria-hidden="true">
                   <div class="lp-term-dots">
                     <span></span>
                     <span></span>
@@ -97,25 +129,46 @@ const displayProjects = featured.length > 0 ? featured : projects.slice(0, 6);
                   </div>
                   <span class="lp-term-title">{sysName}</span>
                 </div>
-                <div class="lp-term-body">
-                  <div class="lp-term-line">
-                    <span class="lp-term-prompt">$</span>
-                    <span>inspect --module 0{index + 1} --target {data.categories.join('/')}</span>
+
+                {posterIsMetadata ? (
+                  <a href={`/projects/${project.id}`} class="lp-term-media" aria-label={`Preview ${data.title}`}>
+                    <Picture
+                      src={posterAsset}
+                      formats={['avif', 'webp']}
+                      widths={[480, 800]}
+                      sizes="(max-width: 920px) 100vw, 440px"
+                      loading="lazy"
+                      alt={`${data.title} preview`}
+                      class="lp-term-img"
+                    />
+                  </a>
+                ) : posterStringUrl ? (
+                  <a href={`/projects/${project.id}`} class="lp-term-media" aria-label={`Preview ${data.title}`}>
+                    <img
+                      src={posterStringUrl}
+                      alt={`${data.title} preview`}
+                      loading="lazy"
+                      class="lp-term-img"
+                    />
+                  </a>
+                ) : (
+                  <div class="lp-term-body" aria-hidden="true">
+                    <div class="lp-term-line">
+                      <span class="lp-term-prompt">$</span>
+                      <span>inspect --module {String(index + 1).padStart(2, '0')} --target {data.categories.join('/')}</span>
+                    </div>
+                    <div class="lp-term-kv">
+                      <span>ENGINE / STACK</span>
+                      <strong>{data.tech.slice(0, 3).join(' · ')}</strong>
+                    </div>
+                    <div class="lp-term-kv">
+                      <span>ROLE</span>
+                      <strong>{data.role || 'XR & Game Developer'}</strong>
+                    </div>
                   </div>
-                  <div class="lp-term-kv">
-                    <span>ENGINE / STACK</span>
-                    <strong>{data.tech.slice(0, 3).join(' · ')}</strong>
-                  </div>
-                  <div class="lp-term-kv">
-                    <span>ROLE</span>
-                    <strong>{data.role || 'XR & Game Developer'}</strong>
-                  </div>
-                  <div class="lp-term-kv">
-                    <span>PIPELINE</span>
-                    <strong>Real-Time 3D · Optimized Build</strong>
-                  </div>
-                </div>
-                <div class="lp-term-foot">
+                )}
+
+                <div class="lp-term-foot" aria-hidden="true">
                   <span class="lp-term-dot"></span>
                   <span>Status: Active Production &middot; Verified</span>
                 </div>
@@ -125,6 +178,16 @@ const displayProjects = featured.length > 0 ? featured : projects.slice(0, 6);
         })
       }
     </div>
+
+    {
+      projects.length > 6 && (
+        <div class="lp-projects-more">
+          <button type="button" class="lp-btn-outline" data-lp-show-all>
+            Show All {projects.length} Projects
+          </button>
+        </div>
+      )
+    }
   </div>
 </section>
 
@@ -140,8 +203,13 @@ const displayProjects = featured.length > 0 ? featured : projects.slice(0, 6);
     padding-inline: clamp(1.25rem, 4vw, 2.5rem);
   }
 
-  .lp-section-head {
-    margin-bottom: clamp(2.25rem, 4.5vw, 3.5rem);
+  .lp-projects-top {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 1.5rem;
+    margin-bottom: clamp(2.25rem, 4.5vw, 3.25rem);
   }
 
   .lp-eyebrow {
@@ -163,6 +231,44 @@ const displayProjects = featured.length > 0 ? featured : projects.slice(0, 6);
     margin: 0;
   }
 
+  .lp-filter-bar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .lp-filter-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.5rem 0.95rem;
+    border-radius: 9999px;
+    border: 1px solid var(--lp-border);
+    background: var(--lp-surface);
+    color: var(--lp-text);
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: border-color 180ms ease, background-color 180ms ease, color 180ms ease;
+  }
+
+  .lp-filter-btn:hover {
+    border-color: var(--lp-accent);
+    color: var(--lp-text-strong);
+  }
+
+  .lp-filter-btn.is-active {
+    background: var(--lp-accent);
+    border-color: var(--lp-accent);
+    color: #09101b;
+    font-weight: 600;
+  }
+
+  .lp-filter-count {
+    font-size: 0.7rem;
+    opacity: 0.78;
+  }
+
   .lp-projects-stack {
     display: grid;
     gap: clamp(1.5rem, 3vw, 2.25rem);
@@ -177,11 +283,16 @@ const displayProjects = featured.length > 0 ? featured : projects.slice(0, 6);
     grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.95fr);
     gap: clamp(1.5rem, 3vw, 2.5rem);
     align-items: center;
-    transition: border-color 220ms ease;
+    transition: border-color 220ms ease, transform 220ms var(--ease-spring);
+  }
+
+  .lp-project-card[hidden],
+  .lp-project-card.is-collapsed {
+    display: none;
   }
 
   .lp-project-card:hover {
-    border-color: rgba(62, 224, 160, 0.32);
+    border-color: rgba(62, 224, 160, 0.36);
   }
 
   .lp-project-main {
@@ -313,7 +424,6 @@ const displayProjects = featured.length > 0 ? featured : projects.slice(0, 6);
     color: var(--lp-accent);
   }
 
-  /* Embedded Terminal / System Status Mockup */
   .lp-terminal {
     background: #09101b;
     border: 1px solid var(--lp-border);
@@ -341,7 +451,6 @@ const displayProjects = featured.length > 0 ? featured : projects.slice(0, 6);
     width: 9px;
     height: 9px;
     border-radius: 9999px;
-    background: rgba(215, 226, 234, 0.22);
   }
 
   .lp-term-dots span:first-child {
@@ -359,6 +468,25 @@ const displayProjects = featured.length > 0 ? featured : projects.slice(0, 6);
   .lp-term-title {
     font-size: 0.72rem;
     color: var(--lp-text-muted);
+  }
+
+  .lp-term-media {
+    display: block;
+    aspect-ratio: 16 / 10;
+    overflow: hidden;
+    background: #0b1322;
+  }
+
+  :global(.lp-term-media picture),
+  .lp-term-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 360ms var(--ease-spring);
+  }
+
+  .lp-term-media:hover .lp-term-img {
+    transform: scale(1.03);
   }
 
   .lp-term-body {
@@ -416,9 +544,97 @@ const displayProjects = featured.length > 0 ? featured : projects.slice(0, 6);
     box-shadow: 0 0 8px rgba(62, 224, 160, 0.85);
   }
 
+  .lp-projects-more {
+    margin-top: 2.25rem;
+    display: flex;
+    justify-content: center;
+  }
+
+  .lp-btn-outline {
+    padding: 0.78rem 1.65rem;
+    border-radius: 9999px;
+    border: 1px solid var(--lp-border-strong);
+    background: transparent;
+    color: var(--lp-text-strong);
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: border-color 180ms ease, color 180ms ease;
+  }
+
+  .lp-btn-outline:hover {
+    border-color: var(--lp-accent);
+    color: var(--lp-accent);
+  }
+
   @media (max-width: 920px) {
     .lp-project-card {
       grid-template-columns: 1fr;
     }
   }
 </style>
+
+<script>
+  let cleanupLpProjects: (() => void) | null = null;
+
+  function initLpProjects(): void {
+    cleanupLpProjects?.();
+    const root = document.querySelector<HTMLElement>('[data-lp-projects]');
+    if (!root) return;
+
+    const controller = new AbortController();
+    const { signal } = controller;
+
+    const filterBtns = Array.from(root.querySelectorAll<HTMLButtonElement>('[data-lp-filter]'));
+    const cards = Array.from(root.querySelectorAll<HTMLElement>('[data-lp-card]'));
+    const showAllBtn = root.querySelector<HTMLButtonElement>('[data-lp-show-all]');
+    let expanded = false;
+
+    const applyFilter = (category: string) => {
+      filterBtns.forEach((btn) => {
+        const active = btn.dataset.lpFilter === category;
+        btn.classList.toggle('is-active', active);
+        btn.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+
+      let visibleIdx = 0;
+      cards.forEach((card) => {
+        const cats = (card.dataset.categories || '').split(',');
+        const matches = category === 'All' || cats.includes(category);
+        card.hidden = !matches;
+        if (matches) {
+          const shouldCollapse = category === 'All' && !expanded && visibleIdx >= 6;
+          card.classList.toggle('is-collapsed', shouldCollapse);
+          visibleIdx += 1;
+        } else {
+          card.classList.remove('is-collapsed');
+        }
+      });
+
+      if (showAllBtn) {
+        showAllBtn.hidden = category !== 'All' || expanded;
+      }
+    };
+
+    filterBtns.forEach((btn) => {
+      btn.addEventListener(
+        'click',
+        () => applyFilter(btn.dataset.lpFilter || 'All'),
+        { signal }
+      );
+    });
+
+    showAllBtn?.addEventListener(
+      'click',
+      () => {
+        expanded = true;
+        applyFilter('All');
+      },
+      { signal }
+    );
+
+    cleanupLpProjects = () => controller.abort();
+  }
+
+  document.addEventListener('astro:page-load', initLpProjects);
+</script>

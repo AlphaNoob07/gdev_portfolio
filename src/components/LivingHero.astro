@@ -20,56 +20,69 @@ const orbitSkills = [
   'Android XR',
   'Python',
   'Computer Vision',
-  'Multiplayer',
 ];
 ---
 
 <section id="top" class="lp-hero" data-living-hero>
-  <canvas class="hero-bg-canvas" data-hero-bg aria-hidden="true"></canvas>
+  <div class="lp-hero-grid-bg" aria-hidden="true"></div>
+  <div class="lp-hero-spotlight" aria-hidden="true"></div>
+  <div class="lp-hero-glow" aria-hidden="true"></div>
+
+
+  <canvas class="lp-matrix-canvas" data-matrix-canvas aria-hidden="true"></canvas>
 
   <div class="lp-hero-stage">
     <div class="lp-hero-center">
-      <h1 class="lp-split-name" aria-label={profile.name}>
+      <h1 class="lp-split-grid" aria-label={profile.name}>
         <span class="lp-name-left">Swapon</span>
+
+        <span class="lp-portrait-slot">
+          <span class="lp-portrait-hub" id="magnetWrap" data-magnet-wrap>
+            <span class="lp-portrait-inner" id="magnetInner" data-magnet-inner>
+              <canvas
+                id="faceGl"
+                class="lp-face-canvas"
+                width="680"
+                height="680"
+                data-sprite-src="/portrait/spritesheet.jpg?v=2"
+                data-fallback-src={profilePic.src}
+                role="button"
+                tabindex="0"
+                aria-label="Interactive portrait of Swapon Islam — drag left or right to stretch face, move cursor to track gaze, hover or click for reactions"
+              ></canvas>
+              <span class="lp-face-props" id="faceProps" aria-hidden="true">
+                <svg id="faceHand" class="lp-face-hand" viewBox="0 0 32 32">
+                  <path
+                    class="hand-grab"
+                    d="M11 14c0-1.4 1.1-2.5 2.5-2.5.6 0 1.2.2 1.6.6.4-.8 1.2-1.3 2.1-1.3 1 0 1.8.6 2.2 1.4.4-.4 1-.6 1.6-.6 1.3 0 2.4 1.1 2.4 2.4v4.6c0 4.1-3.1 7.4-7.2 7.4-3.2 0-5.8-1.9-6.9-4.8l-1.5-3.8c-.4-1.1.1-2.3 1.2-2.7.9-.3 1.9 0 2.4.8l-.4-1.5Z"
+                  />
+                </svg>
+              </span>
+              <img
+                src={profilePic.src}
+                alt={profile.fullName}
+                class="lp-face-fallback"
+                data-face-fallback
+                loading="eager"
+              />
+            </span>
+
+            <span class="orbit-layer" data-orbit-layer aria-hidden="true">
+              {
+                orbitSkills.map((skill, idx) => (
+                  <span class="orbit-pill" data-orbit-pill data-orbit-index={idx}>
+                    {skill}
+                  </span>
+                ))
+              }
+            </span>
+          </span>
+        </span>
+
         <span class="lp-name-right">
-          <span class="lp-i-wrap">
-            <span class="lp-i-dot" aria-hidden="true"></span>I
-          </span>slam
+          Islam<span class="lp-name-dot" aria-hidden="true"></span>
         </span>
       </h1>
-
-      <div class="lp-portrait-hub" id="magnetWrap" data-magnet-wrap>
-        <div class="lp-portrait-inner" id="magnetInner" data-magnet-inner>
-          <canvas
-            id="faceGl"
-            class="lp-face-canvas"
-            width="640"
-            height="640"
-            data-sprite-src="/portrait/spritesheet.jpg"
-            data-fallback-src={profilePic.src}
-            role="button"
-            tabindex="0"
-            aria-label="Interactive portrait of Swapon Islam — move cursor to track gaze, click for reaction"
-          ></canvas>
-          <img
-            src={profilePic.src}
-            alt={profile.fullName}
-            class="lp-face-fallback"
-            data-face-fallback
-            loading="eager"
-          />
-        </div>
-
-        <div class="orbit-layer" data-orbit-layer aria-hidden="true">
-          {
-            orbitSkills.map((skill, idx) => (
-              <span class="orbit-pill" data-orbit-pill data-orbit-index={idx}>
-                {skill}
-              </span>
-            ))
-          }
-        </div>
-      </div>
     </div>
 
     <div class="lp-hero-bottom">
@@ -81,11 +94,14 @@ const orbitSkills = [
           </span>
         </div>
         <p class="lp-hero-bio">
-          {profile.headline}. Building production AR/VR simulations, spatial apps, and real-time 3D experiences from {profile.location}.
+          {profile.headline.replace(/\.+$/, '')}. Building production AR/VR simulations, spatial apps, and real-time 3D experiences from {profile.location}.
         </p>
       </div>
 
       <div class="lp-hero-cta">
+        <a href="#projects" class="lp-btn-ghost">
+          View Projects &rarr;
+        </a>
         <button type="button" class="lp-btn-mint" data-open-contact>
           Contact me
         </button>
@@ -97,21 +113,121 @@ const orbitSkills = [
 <style>
   .lp-hero {
     position: relative;
-    min-height: 100svh;
+    height: 100svh;
+    min-height: 620px;
+    max-height: 940px;
     background: var(--lp-bg);
     overflow: hidden;
     display: flex;
     flex-direction: column;
-    padding-top: 4.5rem;
+    padding-top: 4.25rem;
   }
 
-  .hero-bg-canvas {
+  /* Zero-CPU GPU-composited dot grid */
+  .lp-hero-grid-bg {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background-image: radial-gradient(
+      rgba(215, 226, 234, 0.16) 1px,
+      transparent 1px
+    );
+    background-size: 28px 28px;
+    mask-image: radial-gradient(circle at 50% 48%, #000 30%, transparent 85%);
+    -webkit-mask-image: radial-gradient(circle at 50% 48%, #000 30%, transparent 85%);
+  }
+
+  /* Interactive cursor-following mint spotlight illuminating the dot grid */
+  .lp-hero-spotlight {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    background: radial-gradient(
+      420px circle at var(--mx, 50%) var(--my, 46%),
+      rgba(62, 224, 160, 0.14),
+      rgba(56, 189, 248, 0.04) 42%,
+      transparent 72%
+    );
+  }
+
+  .lp-hero-glow {
+    position: absolute;
+    left: 50%;
+    top: 46%;
+    width: min(740px, 88vw);
+    height: min(740px, 88vw);
+    transform: translate(-50%, -50%);
+    border-radius: 9999px;
+    background: radial-gradient(
+      circle,
+      rgba(62, 224, 160, 0.13) 0%,
+      rgba(56, 189, 248, 0.05) 38%,
+      transparent 70%
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* GPU-composited concentric radar pulse rings */
+  .lp-radar-rings {
+    position: absolute;
+    left: 50%;
+    top: 46%;
+    width: min(760px, 90vw);
+    height: min(760px, 90vw);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .lp-radar-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    border: 1px solid rgba(62, 224, 160, 0.24);
+    opacity: 0;
+    will-change: transform, opacity;
+    animation: lp-radar-pulse 7.5s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+  }
+
+  .lp-radar-ring--2 {
+    animation-delay: 2.5s;
+  }
+
+  .lp-radar-ring--3 {
+    animation-delay: 5s;
+  }
+
+  @keyframes lp-radar-pulse {
+    0% {
+      transform: scale(0.32);
+      opacity: 0;
+    }
+    18% {
+      opacity: 0.45;
+    }
+    100% {
+      transform: scale(1.18);
+      opacity: 0;
+    }
+  }
+
+  /* Glowing LED dot-matrix background canvas */
+  .lp-matrix-canvas {
     position: absolute;
     inset: 0;
     width: 100%;
     height: 100%;
     pointer-events: none;
-    z-index: 0;
+    z-index: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .lp-radar-ring {
+      animation: none;
+    }
   }
 
   .lp-hero-stage {
@@ -119,13 +235,13 @@ const orbitSkills = [
     z-index: 2;
     flex: 1;
     width: 100%;
-    max-width: var(--container-max);
+    max-width: 1360px;
     margin-inline: auto;
-    padding: 1.5rem clamp(1.25rem, 4vw, 2.5rem) clamp(1.75rem, 3.5vw, 2.75rem);
+    padding: 0.75rem clamp(1.5rem, 4.5vw, 3.5rem) clamp(1.25rem, 2.5vw, 2rem);
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    gap: 1.5rem;
+    gap: 0.75rem;
   }
 
   .lp-hero-center {
@@ -133,73 +249,121 @@ const orbitSkills = [
     flex: 1;
     display: grid;
     place-items: center;
-    min-height: clamp(360px, 60vh, 580px);
+    min-height: 0;
   }
 
-  .lp-split-name {
-    position: relative;
-    z-index: 6;
+  /* Symmetrical 3-column layout: zero clipping at 1440px */
+  .lp-split-grid {
     width: 100%;
-    display: flex;
+    margin: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: center;
-    justify-content: space-between;
+    gap: clamp(1rem, 2.4vw, 2.5rem);
     font-family: var(--font-display);
     font-weight: 800;
-    font-size: clamp(3rem, 8.6vw, 7.6rem);
+    font-size: clamp(2.8rem, 6.2vw, 6.2rem);
     line-height: 0.94;
-    letter-spacing: -0.04em;
+    letter-spacing: -0.045em;
     color: var(--lp-text-strong);
-    pointer-events: none;
     user-select: none;
-    margin: 0;
   }
 
-  .lp-i-wrap {
+  .lp-name-left {
+    justify-self: end;
+    text-align: right;
     position: relative;
-    display: inline-block;
+    z-index: 8;
   }
 
-  .lp-i-dot {
-    position: absolute;
-    top: -0.14em;
-    left: 50%;
-    transform: translateX(-50%);
+  .lp-name-right {
+    justify-self: start;
+    text-align: left;
+    position: relative;
+    z-index: 8;
+    display: inline-flex;
+    align-items: baseline;
+  }
+
+  .lp-name-dot {
+    display: inline-block;
     width: 0.16em;
     height: 0.16em;
-    border-radius: 2px;
+    margin-left: 0.08em;
+    border-radius: 3px;
     background: var(--lp-accent);
     box-shadow: 0 0 18px rgba(62, 224, 160, 0.75);
   }
 
-  .lp-portrait-hub {
-    position: absolute;
-    inset: 0;
+  .lp-portrait-slot {
     display: grid;
     place-items: center;
+    position: relative;
     z-index: 10;
+  }
+
+  .lp-portrait-hub {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: min(clamp(240px, 26vw, 380px), 50svh);
+    aspect-ratio: 1 / 1;
   }
 
   .lp-portrait-inner {
     position: relative;
     z-index: 10;
-    width: clamp(230px, 31vw, 390px);
-    aspect-ratio: 1 / 1;
+    width: 100%;
+    height: 100%;
     display: grid;
     place-items: center;
-    transition: transform 260ms var(--ease-spring);
+    will-change: transform;
+    transition: transform 280ms var(--ease-spring);
   }
 
   .lp-portrait-inner.is-poked {
-    transform: scale(1.055);
+    transform: scale(1.06) !important;
   }
 
   .lp-face-canvas {
-    width: 100%;
-    height: 100%;
+    width: 118%;
+    height: 118%;
     display: block;
-    cursor: pointer;
-    border-radius: 9999px;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
     outline: none;
+  }
+
+  .lp-face-canvas.is-grabbing {
+    cursor: grabbing;
+  }
+
+  .lp-face-props {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 12;
+  }
+
+  .lp-face-hand {
+    position: absolute;
+    width: 36px;
+    height: 36px;
+    fill: #ffffff;
+    stroke: #09101b;
+    stroke-width: 1.5px;
+    stroke-linejoin: round;
+    transform: translate(-50%, -50%) scale(0.85);
+    opacity: 0;
+    filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.45));
+    transition: opacity 140ms ease, transform 140ms var(--ease-spring);
+  }
+
+  .lp-face-hand.is-active {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
   }
 
   .lp-face-canvas:focus-visible {
@@ -208,13 +372,12 @@ const orbitSkills = [
 
   .lp-face-fallback {
     position: absolute;
-    inset: 8%;
-    width: 84%;
-    height: 84%;
+    inset: 6%;
+    width: 88%;
+    height: 88%;
     object-fit: cover;
     object-position: center 20%;
     border-radius: 9999px;
-    border: 2px solid rgba(62, 224, 160, 0.25);
     pointer-events: none;
     opacity: 0;
     transition: opacity 240ms ease;
@@ -237,15 +400,16 @@ const orbitSkills = [
     left: 50%;
     top: 50%;
     font-family: var(--font-mono);
-    font-size: clamp(0.68rem, 0.85vw, 0.78rem);
+    font-size: 0.78rem;
     font-weight: 500;
+    letter-spacing: 0.01em;
     color: var(--lp-text-strong);
-    background: rgba(14, 23, 38, 0.86);
-    border: 1px solid rgba(215, 226, 234, 0.16);
-    padding: 0.34rem 0.72rem;
+    background: rgba(14, 23, 38, 0.9);
+    border: 1px solid rgba(215, 226, 234, 0.18);
+    padding: 0.38rem 0.85rem;
     border-radius: 9999px;
     white-space: nowrap;
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.35);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.42);
     will-change: transform, opacity;
   }
 
@@ -255,7 +419,7 @@ const orbitSkills = [
     align-items: flex-end;
     justify-content: space-between;
     gap: 1.5rem;
-    padding-top: 1rem;
+    padding-top: 1.15rem;
     border-top: 1px solid rgba(215, 226, 234, 0.08);
   }
 
@@ -291,6 +455,35 @@ const orbitSkills = [
     line-height: 1.6;
   }
 
+  .lp-hero-cta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .lp-btn-ghost {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0.82rem 1.45rem;
+    border-radius: 9999px;
+    border: 1px solid var(--lp-border-strong);
+    background: rgba(14, 23, 38, 0.55);
+    color: var(--lp-text-strong);
+    font-family: var(--font-sans);
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-decoration: none;
+    transition: border-color 180ms ease, color 180ms ease, transform 180ms var(--ease-spring);
+  }
+
+  .lp-btn-ghost:hover {
+    border-color: var(--lp-accent);
+    color: var(--lp-accent);
+    transform: translateY(-2px);
+  }
+
   .lp-btn-mint {
     display: inline-flex;
     align-items: center;
@@ -314,16 +507,21 @@ const orbitSkills = [
   }
 
   @media (max-width: 900px) {
-    .lp-split-name {
-      flex-direction: column;
-      justify-content: space-between;
-      height: 100%;
-      font-size: clamp(2.8rem, 13vw, 4.4rem);
-      padding-block: 0.5rem;
+    .lp-split-grid {
+      grid-template-columns: 1fr;
+      justify-items: center;
+      gap: 1.25rem;
+      font-size: clamp(2.6rem, 12vw, 4.2rem);
     }
 
-    .lp-portrait-inner {
-      width: clamp(210px, 54vw, 290px);
+    .lp-name-left,
+    .lp-name-right {
+      justify-self: center;
+      text-align: center;
+    }
+
+    .lp-portrait-hub {
+      width: clamp(210px, 56vw, 280px);
     }
   }
 </style>
@@ -341,27 +539,61 @@ const orbitSkills = [
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let rafId = 0;
 
-    // 1. Background Dot-Grid & Matrix Pulse Canvas
-    const bgCanvas = hero.querySelector<HTMLCanvasElement>('[data-hero-bg]');
-    const bgCtx = bgCanvas?.getContext('2d') ?? null;
-
-    const resizeBg = () => {
-      if (!bgCanvas) return;
-      const dpr = Math.min(window.devicePixelRatio || 1, 2);
-      bgCanvas.width = Math.floor(hero.clientWidth * dpr);
-      bgCanvas.height = Math.floor(hero.clientHeight * dpr);
-      if (bgCtx) bgCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    };
-    resizeBg();
-    window.addEventListener('resize', resizeBg, { signal });
-
-    // 2. 3D Orbiting Tech Pills
     const pills = Array.from(hero.querySelectorAll<HTMLElement>('[data-orbit-pill]'));
+    const hub = hero.querySelector<HTMLElement>('[data-magnet-wrap]');
     const magnetInner = hero.querySelector<HTMLElement>('[data-magnet-inner]');
-
-    // 3. WebGL Living Portrait (4x3 Sprite Sheet Blender + Fallback)
     const glCanvas = hero.querySelector<HTMLCanvasElement>('#faceGl');
     const fallbackImg = hero.querySelector<HTMLImageElement>('[data-face-fallback]');
+    const matrixCanvas = hero.querySelector<HTMLCanvasElement>('[data-matrix-canvas]');
+    const matrixCtx = matrixCanvas?.getContext('2d') ?? null;
+
+    // 5x7 LED dot-matrix bitmap font for glowing background tech words
+    const FONT_5X7: Record<string, string[]> = {
+      A: ['01110', '10001', '10001', '11111', '10001', '10001', '10001'],
+      C: ['01111', '10000', '10000', '10000', '10000', '10000', '01111'],
+      D: ['11110', '10001', '10001', '10001', '10001', '10001', '11110'],
+      E: ['11111', '10000', '10000', '11110', '10000', '10000', '11111'],
+      G: ['01111', '10000', '10000', '10111', '10001', '10001', '01110'],
+      H: ['10001', '10001', '10001', '11111', '10001', '10001', '10001'],
+      I: ['11111', '00100', '00100', '00100', '00100', '00100', '11111'],
+      L: ['10000', '10000', '10000', '10000', '10000', '10000', '11111'],
+      M: ['10001', '11011', '10101', '10001', '10001', '10001', '10001'],
+      N: ['10001', '11001', '10101', '10011', '10001', '10001', '10001'],
+      O: ['01110', '10001', '10001', '10001', '10001', '10001', '01110'],
+      P: ['11110', '10001', '10001', '11110', '10000', '10000', '10000'],
+      Q: ['01110', '10001', '10001', '10001', '10101', '10010', '01101'],
+      R: ['11110', '10001', '10001', '11110', '10100', '10010', '10001'],
+      S: ['01111', '10000', '10000', '01110', '00001', '00001', '11110'],
+      T: ['11111', '00100', '00100', '00100', '00100', '00100', '00100'],
+      U: ['10001', '10001', '10001', '10001', '10001', '10001', '01110'],
+      V: ['10001', '10001', '10001', '10001', '10001', '01010', '00100'],
+      X: ['10001', '10001', '01010', '00100', '01010', '10001', '10001'],
+      Y: ['10001', '10001', '01010', '00100', '00100', '00100', '00100'],
+      '#': ['01010', '01010', '11111', '01010', '11111', '01010', '01010'],
+      '+': ['00000', '00100', '00100', '11111', '00100', '00100', '00000'],
+      ' ': ['000', '000', '000', '000', '000', '000', '000'],
+    };
+
+    const MATRIX_WORDS = [
+      { text: 'UNITY', xPct: 0.08, yPct: 0.16 },
+      { text: 'OPENXR', xPct: 0.72, yPct: 0.16 },
+      { text: 'ARCORE', xPct: 0.06, yPct: 0.48 },
+      { text: 'C#', xPct: 0.85, yPct: 0.47 },
+      { text: 'UNREAL', xPct: 0.08, yPct: 0.74 },
+      { text: 'VISION AI', xPct: 0.69, yPct: 0.74 },
+    ];
+
+    const resizeMatrix = () => {
+      if (!matrixCanvas || !matrixCtx) return;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      matrixCanvas.width = Math.floor(hero.clientWidth * dpr);
+      matrixCanvas.height = Math.floor(hero.clientHeight * dpr);
+      matrixCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    };
+    resizeMatrix();
+    window.addEventListener('resize', resizeMatrix, { signal });
+
+    const faceHand = hero.querySelector<SVGElement>('#faceHand');
 
     let pointerX = 0;
     let pointerY = 0;
@@ -369,13 +601,69 @@ const orbitSkills = [
     let smoothY = 0;
     let currentCell = 0;
     let prevCell = 0;
+    let currentFlip = 0;
+    let prevFlip = 0;
     let mix = 1;
     let reactionUntil = 0;
-    let reactionIndex = 0;
+    let forcedCell = 0;
+    let sunglassesUntil = 0;
     let blinkUntil = 0;
-    let nextBlinkAt = performance.now() + 3200;
+    let nextBlinkAt = performance.now() + 3400;
+    let lastTime = performance.now();
 
-    const REACTION_CELLS = [10, 11]; // 10 = wink, 11 = sunglasses
+    // Drag & spring state
+    let isDragging = false;
+    let activePointerId = -1;
+    let dragStartX = 0;
+    let dragStartY = 0;
+    let rawDragPx = 0;
+    let dragTargetX = 0;
+    let dragTargetY = 0;
+    let dragX = 0;
+    let dragY = 0;
+    let dragVelX = 0;
+    let dragVelY = 0;
+
+    // Hover-dwell hotspot tracking on portrait
+    let dwellZone: 'none' | 'center' | 'eye' = 'none';
+    let dwellSince = 0;
+
+    const setExpression = (cell: number, flip = 0) => {
+      if (cell !== currentCell || flip !== currentFlip) {
+        prevCell = currentCell;
+        prevFlip = currentFlip;
+        currentCell = cell;
+        currentFlip = flip;
+        mix = 0;
+      }
+    };
+
+    // Expose window.triggerSunglasses matching reference site
+    (window as unknown as { triggerSunglasses?: (on: boolean, ms?: number) => void }).triggerSunglasses = (
+      on: boolean,
+      ms = 60000
+    ) => {
+      sunglassesUntil = on ? performance.now() + ms : 0;
+    };
+
+    // Trigger sunglasses when hovering primary Contact buttons
+    document.querySelectorAll<HTMLElement>('[data-open-contact]').forEach((btn) => {
+      btn.addEventListener(
+        'pointerenter',
+        () => {
+          sunglassesUntil = Math.max(sunglassesUntil, performance.now() + 2400);
+        },
+        { signal }
+      );
+      btn.addEventListener(
+        'pointerleave',
+        () => {
+          const modal = document.querySelector<HTMLElement>('[data-contact-modal]');
+          if (!modal || modal.hidden) sunglassesUntil = 0;
+        },
+        { signal }
+      );
+    });
 
     window.addEventListener(
       'pointermove',
@@ -383,44 +671,138 @@ const orbitSkills = [
         const rect = hero.getBoundingClientRect();
         const cx = rect.left + rect.width / 2;
         const cy = rect.top + rect.height / 2;
-        pointerX = Math.max(-1, Math.min(1, (e.clientX - cx) / (rect.width * 0.45)));
-        pointerY = Math.max(-1, Math.min(1, (e.clientY - cy) / (rect.height * 0.45)));
+        pointerX = Math.max(-1, Math.min(1, (e.clientX - cx) / (rect.width * 0.42)));
+        pointerY = Math.max(-1, Math.min(1, (e.clientY - cy) / (rect.height * 0.42)));
+
+        if (isDragging && e.pointerId === activePointerId) {
+          const dx = e.clientX - dragStartX;
+          const dy = e.clientY - dragStartY;
+          rawDragPx = Math.hypot(dx, dy);
+          const maxPull = 115;
+          const clampedMag = Math.min(maxPull, rawDragPx);
+          const scale = rawDragPx > 0.001 ? clampedMag / rawDragPx : 0;
+          dragTargetX = (dx * scale) / maxPull;
+          dragTargetY = (dy * scale) / maxPull;
+
+          if (faceHand && hub) {
+            const hubRect = hub.getBoundingClientRect();
+            faceHand.style.left = `${e.clientX - hubRect.left}px`;
+            faceHand.style.top = `${e.clientY - hubRect.top}px`;
+          }
+          return;
+        }
+
+        // Hover-dwell hotspot check on portrait (nose/mouth -> tongue; eyes -> wink)
+        if (glCanvas) {
+          const fRect = glCanvas.getBoundingClientRect();
+          const fx = (e.clientX - (fRect.left + fRect.width / 2)) / (fRect.width * 0.5);
+          const fy = (e.clientY - (fRect.top + fRect.height / 2)) / (fRect.height * 0.5);
+          let nextZone: 'none' | 'center' | 'eye' = 'none';
+          if (Math.hypot(fx, fy - 0.08) < 0.2) {
+            nextZone = 'center';
+          } else if (
+            Math.hypot(fx - 0.2, fy + 0.08) < 0.16 ||
+            Math.hypot(fx + 0.2, fy + 0.08) < 0.16
+          ) {
+            nextZone = 'eye';
+          }
+          if (nextZone !== dwellZone) {
+            dwellZone = nextZone;
+            dwellSince = performance.now();
+          }
+        }
       },
       { passive: true, signal }
     );
 
-    const triggerPoke = () => {
+    glCanvas?.addEventListener(
+      'pointerdown',
+      (e) => {
+        e.preventDefault();
+        isDragging = true;
+        activePointerId = e.pointerId;
+        dragStartX = e.clientX;
+        dragStartY = e.clientY;
+        rawDragPx = 0;
+        dragTargetX = 0;
+        dragTargetY = 0;
+        glCanvas.setPointerCapture?.(e.pointerId);
+        glCanvas.classList.add('is-grabbing');
+        if (faceHand && hub) {
+          const hubRect = hub.getBoundingClientRect();
+          faceHand.style.left = `${e.clientX - hubRect.left}px`;
+          faceHand.style.top = `${e.clientY - hubRect.top}px`;
+          faceHand.classList.add('is-active');
+        }
+        // Immediately trigger SHOCK (cell 7) on grab
+        setExpression(7, 0);
+      },
+      { signal }
+    );
+
+    const endDrag = (e: PointerEvent) => {
+      if (!isDragging || e.pointerId !== activePointerId) return;
       const now = performance.now();
-      const target = REACTION_CELLS[reactionIndex % REACTION_CELLS.length];
-      reactionIndex += 1;
-      prevCell = currentCell;
-      currentCell = target;
-      mix = 0;
-      reactionUntil = now + 1350;
-      if (magnetInner) {
-        magnetInner.classList.add('is-poked');
-        window.setTimeout(() => magnetInner.classList.remove('is-poked'), 260);
+      const finalDist = rawDragPx;
+      isDragging = false;
+      activePointerId = -1;
+      dragTargetX = 0;
+      dragTargetY = 0;
+      glCanvas?.classList.remove('is-grabbing');
+      faceHand?.classList.remove('is-active');
+
+      if (finalDist > 52) {
+        // Released from strong pull (> 52px): ANGRY lingers ~720ms while features snap back
+        forcedCell = 8;
+        reactionUntil = now + 720;
+        setExpression(8, 0);
+      } else if (finalDist < 8 && glCanvas) {
+        // Quick tap/click without drag -> region-based reaction matching reference!
+        const fRect = glCanvas.getBoundingClientRect();
+        const fy = (e.clientY - (fRect.top + fRect.height / 2)) / (fRect.height * 0.5);
+        if (fy < -0.14) {
+          forcedCell = 8; // upper brow -> angry
+          reactionUntil = now + 1100;
+          setExpression(8, 0);
+        } else if (fy < 0.22) {
+          forcedCell = 9; // nose/mouth -> tongue
+          reactionUntil = now + 1250;
+          setExpression(9, 0);
+        } else {
+          forcedCell = 10; // chin -> wink
+          reactionUntil = now + 1250;
+          setExpression(10, 0);
+        }
+      } else {
+        reactionUntil = 0;
       }
     };
 
-    glCanvas?.addEventListener('click', triggerPoke, { signal });
+    window.addEventListener('pointerup', endDrag, { signal });
+    window.addEventListener('pointercancel', endDrag, { signal });
+
     glCanvas?.addEventListener(
       'keydown',
       (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          triggerPoke();
+          forcedCell = forcedCell === 10 ? 9 : 10;
+          reactionUntil = performance.now() + 1300;
+          setExpression(forcedCell, 0);
         }
       },
       { signal }
     );
 
-    // Setup WebGL shader for 4x3 sprite blending
+    // WebGL 4x3 Sprite Blender + Inner-Feature Rubber-Band Warp
     let gl: WebGLRenderingContext | null = null;
     let uFromLoc: WebGLUniformLocation | null = null;
     let uToLoc: WebGLUniformLocation | null = null;
+    let uFlipFromLoc: WebGLUniformLocation | null = null;
+    let uFlipToLoc: WebGLUniformLocation | null = null;
     let uMixLoc: WebGLUniformLocation | null = null;
     let uTiltLoc: WebGLUniformLocation | null = null;
+    let uDragLoc: WebGLUniformLocation | null = null;
     let textureReady = false;
 
     if (glCanvas) {
@@ -439,33 +821,48 @@ const orbitSkills = [
           uniform sampler2D uTex;
           uniform float uFrom;
           uniform float uTo;
+          uniform float uFlipFrom;
+          uniform float uFlipTo;
           uniform float uMix;
           uniform vec2 uTilt;
+          uniform vec2 uDrag;
           varying vec2 vUv;
 
-          vec2 cellUv(vec2 uv, float idx) {
+          vec2 cellUv(vec2 uv, float idx, float flipX) {
             float col = mod(idx, 4.0);
             float row = floor(idx / 4.0);
-            vec2 inset = uv * 0.92 + 0.04;
+            vec2 fuv = vec2(flipX > 0.5 ? (1.0 - uv.x) : uv.x, uv.y);
+            vec2 inset = fuv * 0.94 + 0.03;
             return vec2((col + inset.x) / 4.0, (row + inset.y) / 3.0);
           }
 
           void main() {
-            vec2 centered = vUv - 0.5;
-            float dist = length(centered * vec2(1.06, 1.02));
-            float mask = smoothstep(0.49, 0.41, dist);
-            if (mask <= 0.001) discard;
+            // Radial falloff: pulls inner facial features toward drag vector while keeping silhouette anchored
+            float rDist = length(vUv - vec2(0.5, 0.52));
+            float innerWeight = smoothstep(0.46, 0.06, rDist);
+            vec2 dragShift = -uDrag * 0.165 * innerWeight * innerWeight;
+            vec2 warpedUv = clamp(vUv + dragShift + uTilt * 0.008, 0.01, 0.99);
 
-            vec2 warpedUv = clamp(vUv + uTilt * 0.018, 0.02, 0.98);
-            vec4 cFrom = texture2D(uTex, cellUv(warpedUv, uFrom));
-            vec4 cTo = texture2D(uTex, cellUv(warpedUv, uTo));
-            vec4 color = mix(cFrom, cTo, uMix);
+            vec4 cFrom = texture2D(uTex, cellUv(warpedUv, uFrom, uFlipFrom));
+            vec4 cTo = texture2D(uTex, cellUv(warpedUv, uTo, uFlipTo));
+            float eased = uMix * uMix * (3.0 - 2.0 * uMix);
+            vec4 color = mix(cFrom, cTo, eased);
 
-            // Subtle mint edge glow
-            float rim = smoothstep(0.38, 0.46, dist) * (1.0 - smoothstep(0.46, 0.49, dist));
-            color.rgb += vec3(0.243, 0.878, 0.627) * rim * 0.35;
+            // Key out the solid #0E1726 background so only the floating head renders
+            vec3 bgCol = vec3(0.0549, 0.0902, 0.1490);
+            float bgDist = distance(color.rgb, bgCol);
+            float alpha = smoothstep(0.07, 0.17, bgDist);
+            // Protect face interior (e.g. dark sunglasses) from being keyed out
+            vec2 fc = (warpedUv - vec2(0.5, 0.52)) * vec2(1.3, 1.0);
+            alpha = max(alpha, smoothstep(0.28, 0.2, length(fc)));
+            // Despill navy fringe on hair edges
+            color.rgb = mix(bgCol, color.rgb, clamp(alpha * 1.2, 0.0, 1.0));
+            // Soft outer safety fade at very edge of canvas
+            float edge = smoothstep(0.50, 0.45, length(vUv - 0.5));
+            alpha *= edge;
+            if (alpha <= 0.01) discard;
 
-            gl_FragColor = vec4(color.rgb, color.a * mask);
+            gl_FragColor = vec4(color.rgb * alpha, alpha);
           }
         `;
 
@@ -495,10 +892,13 @@ const orbitSkills = [
 
         uFromLoc = gl.getUniformLocation(prog, 'uFrom');
         uToLoc = gl.getUniformLocation(prog, 'uTo');
+        uFlipFromLoc = gl.getUniformLocation(prog, 'uFlipFrom');
+        uFlipToLoc = gl.getUniformLocation(prog, 'uFlipTo');
         uMixLoc = gl.getUniformLocation(prog, 'uMix');
         uTiltLoc = gl.getUniformLocation(prog, 'uTilt');
+        uDragLoc = gl.getUniformLocation(prog, 'uDrag');
 
-        const spriteSrc = glCanvas.dataset.spriteSrc || '/portrait/spritesheet.png';
+        const spriteSrc = glCanvas.dataset.spriteSrc || '/portrait/spritesheet.jpg';
         const img = new Image();
         img.crossOrigin = 'anonymous';
         img.onload = () => {
@@ -522,90 +922,153 @@ const orbitSkills = [
       }
     }
 
-    function pickGazeCell(x: number, y: number): number {
+    function pickGaze(x: number, y: number): { cell: number; flip: number } {
       const dead = 0.22;
       const gx = Math.abs(x) < dead ? 0 : x > 0 ? 1 : -1;
       const gy = Math.abs(y) < dead ? 0 : y > 0 ? 1 : -1;
-      if (gx === 0 && gy === 0) return 0; // neutral
-      if (gx === 0 && gy < 0) return 2; // up
-      if (gx === 0 && gy > 0) return 3; // down
-      if (gx < 0 && gy === 0) return 4; // left
-      if (gx > 0 && gy === 0) return 5; // right
-      if (gx < 0 && gy < 0) return 6; // upleft
-      if (gx > 0 && gy < 0) return 7; // upright
-      if (gx < 0 && gy > 0) return 8; // downleft
-      return 9; // downright
+      if (gx === 0 && gy === 0) return { cell: 0, flip: 0 }; // neutral
+      if (gx === 0 && gy < 0) return { cell: 2, flip: 0 }; // up
+      if (gx === 0 && gy > 0) return { cell: 3, flip: 0 }; // down
+      if (gx < 0 && gy === 0) return { cell: 4, flip: 1 }; // mirror right -> left
+      if (gx > 0 && gy === 0) return { cell: 4, flip: 0 }; // right
+      if (gx < 0 && gy < 0) return { cell: 5, flip: 1 }; // mirror upright -> upleft
+      if (gx > 0 && gy < 0) return { cell: 5, flip: 0 }; // upright
+      if (gx < 0 && gy > 0) return { cell: 6, flip: 1 }; // mirror downright -> downleft
+      return { cell: 6, flip: 0 }; // downright
     }
 
     const tick = (now: number) => {
       if (signal.aborted) return;
 
-      // Smooth pointer tracking
-      smoothX += (pointerX - smoothX) * 0.1;
-      smoothY += (pointerY - smoothY) * 0.1;
+      const dt = Math.min(0.05, (now - lastTime) / 1000);
+      lastTime = now;
 
-      // Background dot-grid + subtle radar pulse
-      if (bgCtx && bgCanvas) {
-        const w = hero.clientWidth;
-        const h = hero.clientHeight;
-        bgCtx.clearRect(0, 0, w, h);
+      // Frame-rate independent smooth damping
+      const damp = 1 - Math.exp(-8 * dt);
+      smoothX += (pointerX - smoothX) * damp;
+      smoothY += (pointerY - smoothY) * damp;
 
-        const gap = 28;
-        const pulseR = ((now * 0.06) % Math.max(w, h) * 0.85);
-        const cx = w * 0.5;
-        const cy = h * 0.46;
+      // Cursor spotlight only (no DOM translation on #magnetInner, matching reference)
+      if (!reduceMotion) {
+        hero.style.setProperty('--mx', `${(50 + smoothX * 38).toFixed(1)}%`);
+        hero.style.setProperty('--my', `${(46 + smoothY * 34).toFixed(1)}%`);
+      }
 
-        for (let y = 14; y < h; y += gap) {
-          for (let x = 14; x < w; x += gap) {
-            const dx = x - cx;
-            const dy = y - cy;
-            const dist = Math.hypot(dx, dy);
-            const ring = Math.max(0, 1 - Math.abs(dist - pulseR) / 90);
-            if (ring > 0.15 && !reduceMotion) {
-              bgCtx.fillStyle = `rgba(62, 224, 160, ${(0.06 + ring * 0.22).toFixed(3)})`;
-              bgCtx.fillRect(x, y, 2, 2);
-            } else {
-              bgCtx.fillStyle = 'rgba(215, 226, 234, 0.09)';
-              bgCtx.fillRect(x, y, 1.5, 1.5);
-            }
-          }
+      // Elastic rubber-band spring physics for face drag & snap-back
+      if (isDragging) {
+        const pullLerp = 1 - Math.exp(-26 * dt);
+        dragX += (dragTargetX - dragX) * pullLerp;
+        dragY += (dragTargetY - dragY) * pullLerp;
+        dragVelX = 0;
+        dragVelY = 0;
+      } else {
+        const stiffness = 280;
+        const damping = 18;
+        dragVelX += (-stiffness * dragX - damping * dragVelX) * dt;
+        dragVelY += (-stiffness * dragY - damping * dragVelY) * dt;
+        dragX += dragVelX * dt;
+        dragY += dragVelY * dt;
+        if (Math.abs(dragX) < 0.0005 && Math.abs(dragVelX) < 0.005) {
+          dragX = 0;
+          dragVelX = 0;
+        }
+        if (Math.abs(dragY) < 0.0005 && Math.abs(dragVelY) < 0.005) {
+          dragY = 0;
+          dragVelY = 0;
         }
       }
 
-      // 3D Orbiting Tech Pills
-      if (pills.length > 0) {
-        const t = reduceMotion ? 0.8 : now * 0.00028;
-        const rx = Math.min(hero.clientWidth * 0.34, 340);
-        const ry = Math.min(hero.clientHeight * 0.15, 118);
+      // Render ONE large crisp square-pixel LED word at a time (matching reference "Expo" style)
+      if (matrixCtx && matrixCanvas) {
+        const w = hero.clientWidth;
+        const h = hero.clientHeight;
+        matrixCtx.clearRect(0, 0, w, h);
+
+        const cycleSec = 4.2;
+        const tSec = now * 0.001;
+        const activeIdx = Math.floor(tSec / cycleSec) % MATRIX_WORDS.length;
+        const localT = (tSec % cycleSec) / cycleSec;
+        const fadeIn = Math.min(1, localT / 0.14);
+        const fadeOut = Math.min(1, (1 - localT) / 0.14);
+        const alpha = reduceMotion ? 0.85 : Math.min(fadeIn, fadeOut) * 0.92;
+
+        const word = MATRIX_WORDS[activeIdx];
+        const cell = w < 640 ? 5 : 8;
+        const pxSize = w < 640 ? 3.8 : 6;
+
+        // Right-aligned in lower-right corner, clear of the pill orbit
+        let cols = 0;
+        for (const ch of word.text) cols += ((FONT_5X7[ch] || FONT_5X7[' '])[0]?.length ?? 3) + 1.5;
+        const wordW = cols * cell;
+        const startX = Math.max(24, w - wordW - (w < 640 ? 24 : 64));
+        const startY = h * 0.7;
+
+        matrixCtx.fillStyle = `rgba(62, 224, 160, ${alpha.toFixed(3)})`;
+        matrixCtx.shadowColor = 'rgba(62, 224, 160, 0.55)';
+        matrixCtx.shadowBlur = 10;
+
+        let cursorCol = 0;
+        for (const ch of word.text) {
+          const glyph = FONT_5X7[ch] || FONT_5X7[' '];
+          for (let row = 0; row < glyph.length; row++) {
+            const line = glyph[row];
+            for (let col = 0; col < line.length; col++) {
+              if (line[col] !== '1') continue;
+              matrixCtx.fillRect(
+                startX + (cursorCol + col) * cell,
+                startY + row * cell,
+                pxSize,
+                pxSize
+              );
+            }
+          }
+          cursorCol += (glyph[0]?.length ?? 3) + 1.5;
+        }
+        matrixCtx.shadowBlur = 0;
+      }
+
+      // Tall spherical 3D Orbiting Tech Pills (above head, below chin, around face)
+      if (pills.length > 0 && hub) {
+        const size = hub.clientWidth || 340;
+        const rx = size * 0.95;
+        const ry = size * 0.66;
+        const t = reduceMotion ? 0.6 : now * 0.00024;
 
         pills.forEach((pill, i) => {
+          // Elliptical orbit: pills pass above/below the head, never across the face
           const angle = t + (i / pills.length) * Math.PI * 2;
           const x = Math.cos(angle) * rx;
-          const z = Math.sin(angle); // -1 back, +1 front
-          const y = z * ry + Math.sin(angle * 2) * 10;
-          const scale = 0.78 + (z + 1) * 0.16;
-          const opacity = 0.34 + (z + 1) * 0.33;
+          const z = Math.sin(angle);
+          const y = -z * ry + Math.sin(angle * 2 + i) * size * 0.04;
+
+          const scale = 0.74 + (z + 1) * 0.15;
+          const opacity = 0.25 + (z + 1) * 0.37;
           pill.style.transform = `translate3d(calc(-50% + ${x.toFixed(1)}px), calc(-50% + ${y.toFixed(1)}px), 0) scale(${scale.toFixed(3)})`;
           pill.style.opacity = opacity.toFixed(3);
-          pill.style.zIndex = z > 0 ? '15' : '5';
+          pill.style.zIndex = z > 0 ? '14' : '4';
         });
       }
 
-      // Living Portrait State Machine (Reaction -> Blink -> 8-way Gaze)
-      if (!reduceMotion && now > reactionUntil) {
+      // Living Portrait Expression State Machine (Drag -> Linger -> Sunglasses -> Hover Dwell -> Blink -> Gaze)
+      if (isDragging) {
+        // <= 52px = SHOCK (7), > 52px = ANGRY (8)
+        setExpression(rawDragPx > 52 ? 8 : 7, 0);
+      } else if (now < reactionUntil) {
+        setExpression(forcedCell, 0);
+      } else if (now < sunglassesUntil) {
+        setExpression(11, 0);
+      } else if (!reduceMotion && dwellZone !== 'none' && now - dwellSince > 420) {
+        setExpression(dwellZone === 'center' ? 9 : 10, 0);
+      } else if (!reduceMotion) {
         if (now >= nextBlinkAt) {
-          blinkUntil = now + 150;
-          nextBlinkAt = now + 3400 + Math.random() * 2800;
+          blinkUntil = now + 140;
+          nextBlinkAt = now + 3400 + Math.random() * 2600;
         }
-        const desiredCell = now < blinkUntil ? 1 : pickGazeCell(smoothX, smoothY);
-        if (desiredCell !== currentCell) {
-          prevCell = currentCell;
-          currentCell = desiredCell;
-          mix = 0;
-        }
+        const desired = now < blinkUntil ? { cell: 1, flip: 0 } : pickGaze(smoothX, smoothY);
+        setExpression(desired.cell, desired.flip);
       }
 
-      mix = Math.min(1, mix + 0.16);
+      mix = Math.min(1, mix + dt * 9.0);
 
       if (gl && textureReady) {
         gl.viewport(0, 0, glCanvas!.width, glCanvas!.height);
@@ -613,8 +1076,11 @@ const orbitSkills = [
         gl.clear(gl.COLOR_BUFFER_BIT);
         gl.uniform1f(uFromLoc, prevCell);
         gl.uniform1f(uToLoc, currentCell);
+        gl.uniform1f(uFlipFromLoc, prevFlip);
+        gl.uniform1f(uFlipToLoc, currentFlip);
         gl.uniform1f(uMixLoc, mix);
         gl.uniform2f(uTiltLoc, -smoothX, -smoothY);
+        gl.uniform2f(uDragLoc, dragX, dragY);
         gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
       }
 

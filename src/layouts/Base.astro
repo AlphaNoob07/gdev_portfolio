@@ -9,6 +9,7 @@ import LivingNav from '../components/LivingNav.astro';
 import LivingFooter from '../components/LivingFooter.astro';
 import ContactModal from '../components/ContactModal.astro';
 import ScrollAvatar from '../components/ScrollAvatar.astro';
+import ScrollRail from '../components/ScrollRail.astro';
 import Assistant from '../components/Assistant.astro';
 import { getProfile } from '../lib/content';
 
@@ -139,6 +140,7 @@ const structuredData = jsonLd
 
     {!noindex && <ContactModal profile={profile} />}
     {!noindex && <ScrollAvatar />}
+    {!noindex && <ScrollRail />}
     {!noindex && <Assistant />}
 
     <script>

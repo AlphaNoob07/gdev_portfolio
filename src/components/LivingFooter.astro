@@ -1,5 +1,6 @@
 ---
 import type { ProfileData } from '../lib/content';
+import StatsPanel from './StatsPanel.astro';
 
 interface Props {
   profile: ProfileData;
@@ -80,6 +81,7 @@ const { profile } = Astro.props;
 
     <div class="lp-footer-copy">
       <span>&copy; {new Date().getFullYear()} {profile.name}. All rights reserved.</span>
+      <StatsPanel />
       <span>Built with Astro &amp; WebGL</span>
     </div>
   </div>

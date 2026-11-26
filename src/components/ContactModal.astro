@@ -19,7 +19,7 @@ const { profile } = Astro.props;
   <div class="lp-modal-card">
     <div class="lp-modal-head">
       <div>
-        <span class="lp-modal-eyebrow">Direct Inquiry</span>
+        <span class="lp-modal-eyebrow">Get In Touch</span>
         <h2 id="lp-modal-title" class="lp-modal-title">Let&rsquo;s Build</h2>
       </div>
       <button
@@ -136,6 +136,8 @@ const { profile } = Astro.props;
   }
 
   .lp-modal-title {
+    text-transform: uppercase;
+    letter-spacing: -0.02em;
     margin: 0.25rem 0 0;
     font-family: var(--font-display);
     font-size: 1.85rem;
@@ -177,7 +179,10 @@ const { profile } = Astro.props;
   .lp-field {
     display: grid;
     gap: 0.35rem;
-    font-size: 0.8rem;
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    font-size: 0.72rem;
     color: var(--lp-text);
   }
 
@@ -234,6 +239,7 @@ const { profile } = Astro.props;
   }
 
   .lp-btn-mint {
+    box-shadow: 0 0 24px -4px rgba(62, 224, 160, 0.6);
     padding: 0.78rem 1.6rem;
     border-radius: 9999px;
     border: none;
@@ -270,12 +276,14 @@ const { profile } = Astro.props;
       modal.hidden = false;
       openedAt = Date.now();
       document.body.style.overflow = 'hidden';
+      (window as unknown as { triggerSunglasses?: (on: boolean, ms?: number) => void }).triggerSunglasses?.(true, 60000);
       form.querySelector<HTMLInputElement>('input[name="name"]')?.focus();
     };
 
     const closeModal = () => {
       modal.hidden = true;
       document.body.style.overflow = '';
+      (window as unknown as { triggerSunglasses?: (on: boolean, ms?: number) => void }).triggerSunglasses?.(false);
     };
 
     window.addEventListener('lp:open-contact', openModal, { signal });

@@ -9,10 +9,10 @@ interface Props {
 const { profile, skills } = Astro.props;
 
 const metrics = [
-  { value: '10+', label: 'Years Experience' },
-  { value: '15+', label: 'Shipped XR & Game Projects' },
-  { value: '4+', label: 'Engines & XR Platforms' },
-  { value: '100%', label: 'Lifecycle Ownership' },
+  { value: '10+', label: 'Years Experience', sub: 'Production Engineering' },
+  { value: '15+', label: 'Shipped Projects', sub: 'XR, Games & AI' },
+  { value: '4+', label: 'Core Platforms', sub: 'Unity · Unreal · OpenXR' },
+  { value: '100%', label: 'Lifecycle Ownership', sub: 'R&D to Production' },
 ];
 
 const stackCards = skills.categories.slice(0, 4);
@@ -27,6 +27,9 @@ const stackCards = skills.categories.slice(0, 4);
 
     <div class="lp-about-grid">
       <div class="lp-about-bio">
+        <h3 class="lp-about-lead">
+          Engineering spatial computing, medical AR/VR simulations, and real-time 3D systems built for production.
+        </h3>
         {profile.about.map((paragraph) => <p class="lp-prose">{paragraph}</p>)}
 
         <div class="lp-contact-pills">
@@ -64,6 +67,7 @@ const stackCards = skills.categories.slice(0, 4);
             <div class="lp-metric-card">
               <span class="lp-metric-val">{m.value}</span>
               <span class="lp-metric-label">{m.label}</span>
+              <span class="lp-metric-sub">{m.sub}</span>
             </div>
           ))
         }
@@ -233,11 +237,21 @@ const stackCards = skills.categories.slice(0, 4);
     gap: 0.45rem;
   }
 
+  .lp-about-lead {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: clamp(1.25rem, 2.2vw, 1.6rem);
+    font-weight: 700;
+    line-height: 1.35;
+    color: var(--lp-text-strong);
+    letter-spacing: -0.02em;
+  }
+
   .lp-metric-val {
     font-family: var(--font-display);
-    font-size: clamp(2rem, 3.6vw, 2.9rem);
+    font-size: clamp(2rem, 3.6vw, 2.85rem);
     font-weight: 800;
-    color: var(--lp-accent);
+    color: var(--lp-text-strong);
     letter-spacing: -0.03em;
     line-height: 1;
   }
@@ -245,7 +259,13 @@ const stackCards = skills.categories.slice(0, 4);
   .lp-metric-label {
     font-size: var(--text-sm);
     color: var(--lp-text);
-    font-weight: 500;
+    font-weight: 600;
+  }
+
+  .lp-metric-sub {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--lp-accent);
   }
 
   .lp-stack-block {
