@@ -42,14 +42,14 @@ const orbitSkills = [
               <canvas
                 id="faceGl"
                 class="lp-face-canvas"
-                width="680"
-                height="680"
-                data-sprite-src="/portrait/spritesheet.jpg?v=2"
-                data-gear-src="/portrait/xr-gear.jpg?v=2"
+                width="760"
+                height="760"
+                data-sprite-src="/portrait/spritesheet.jpg?v=3"
+                data-gear-src="/portrait/xr-gear.jpg?v=3"
                 data-fallback-src={profilePic.src}
                 role="button"
                 tabindex="0"
-                aria-label="Interactive portrait of Swapon Islam — drag to stretch face, click to cycle AR glasses and VR headsets"
+                aria-label="Interactive portrait of Swapon Islam — drag to stretch face, click to cycle XREAL AR glasses and VR headsets"
               ></canvas>
               <span class="lp-face-props" id="faceProps" aria-hidden="true">
                 <span class="lp-gear-badge" data-gear-badge></span>
@@ -308,8 +308,9 @@ const orbitSkills = [
     position: relative;
     display: grid;
     place-items: center;
-    width: min(clamp(240px, 26vw, 380px), 50svh);
+    width: min(clamp(300px, 32vw, 440px), 52svh);
     aspect-ratio: 1 / 1;
+    flex-shrink: 0;
   }
 
   .lp-portrait-inner {
@@ -328,8 +329,8 @@ const orbitSkills = [
   }
 
   .lp-face-canvas {
-    width: 118%;
-    height: 118%;
+    width: 112%;
+    height: 112%;
     display: block;
     cursor: grab;
     touch-action: none;
@@ -854,6 +855,8 @@ const orbitSkills = [
     let uTexLoc: WebGLUniformLocation | null = null;
     let uGearTexLoc: WebGLUniformLocation | null = null;
     let uGearReadyLoc: WebGLUniformLocation | null = null;
+    let uAspect1Loc: WebGLUniformLocation | null = null;
+    let uAspect2Loc: WebGLUniformLocation | null = null;
     let uFromLoc: WebGLUniformLocation | null = null;
     let uToLoc: WebGLUniformLocation | null = null;
     let uFlipFromLoc: WebGLUniformLocation | null = null;
@@ -863,6 +866,8 @@ const orbitSkills = [
     let uDragLoc: WebGLUniformLocation | null = null;
     let textureReady = false;
     let gearReady = false;
+    let cellAspect1 = 0.75; // 1024/4 / (1024/3)
+    let cellAspect2 = 0.8929; // 1200/3 / (896/2)
 
     if (glCanvas) {
       gl = glCanvas.getContext('webgl', { alpha: true, antialias: true });
@@ -880,6 +885,8 @@ const orbitSkills = [
           uniform sampler2D uTex;
           uniform sampler2D uGearTex;
           uniform float uGearReady;
+          uniform float uAspect1;
+          uniform float uAspect2;
           uniform float uFrom;
           uniform float uTo;
           uniform float uFlipFrom;
@@ -889,42 +896,56 @@ const orbitSkills = [
           uniform vec2 uDrag;
           varying vec2 vUv;
 
-          vec4 samplePose(vec2 uv, float idx, float flipX) {
-            if (idx >= 12.0 && uGearReady > 0.5) {
+          // Sample each pose at its exact 1:1 natural pixel aspect ratio (zero horizontal squish!)
+          vec4 samplePose(vec2 uv, float idx, float flipX, out float edgeMask) {
+            bool isGear = (idx >= 12.0 && uGearReady > 0.5);
+            float cellAspect = isGear ? uAspect2 : uAspect1;
+            float localX = (uv.x - 0.5) / cellAspect + 0.5;
+
+            // Smoothly feather outer shoulder edges & bottom hem so suit never cuts sharply
+            float shoulderFade = smoothstep(0.50, 0.39, abs(localX - 0.5));
+            float hemFade = smoothstep(0.99, 0.85, uv.y);
+            float topFade = smoothstep(0.005, 0.035, uv.y);
+            edgeMask = shoulderFade * hemFade * topFade;
+
+            if (localX <= 0.002 || localX >= 0.998) {
+              edgeMask = 0.0;
+              return vec4(0.0, 1.0, 0.0, 1.0);
+            }
+
+            if (isGear) {
               float gIdx = idx - 12.0;
               float col = mod(gIdx, 3.0);
               float row = floor(gIdx / 3.0);
-              vec2 inset = uv * 0.94 + 0.03;
+              vec2 inset = vec2(localX, uv.y) * 0.97 + 0.015;
               return texture2D(uGearTex, vec2((col + inset.x) / 3.0, (row + inset.y) / 2.0));
             }
             float actualIdx = idx >= 12.0 ? 11.0 : idx;
             float col = mod(actualIdx, 4.0);
             float row = floor(actualIdx / 4.0);
-            vec2 fuv = vec2(flipX > 0.5 ? (1.0 - uv.x) : uv.x, uv.y);
-            vec2 inset = fuv * 0.94 + 0.03;
+            float fx = flipX > 0.5 ? (1.0 - localX) : localX;
+            vec2 inset = vec2(fx, uv.y) * 0.97 + 0.015;
             return texture2D(uTex, vec2((col + inset.x) / 4.0, (row + inset.y) / 3.0));
           }
 
           void main() {
-            float rDist = length(vUv - vec2(0.5, 0.52));
-            float innerWeight = smoothstep(0.46, 0.06, rDist);
-            vec2 dragShift = -uDrag * 0.165 * innerWeight * innerWeight;
-            vec2 warpedUv = clamp(vUv + dragShift + uTilt * 0.008, 0.01, 0.99);
+            float rDist = length((vUv - vec2(0.5, 0.39)) * vec2(1.25, 1.35));
+            float innerWeight = smoothstep(0.40, 0.05, rDist);
+            vec2 dragShift = -uDrag * 0.145 * innerWeight * innerWeight;
+            vec2 warpedUv = clamp(vUv + dragShift + uTilt * 0.006, 0.005, 0.995);
 
-            vec4 cFrom = samplePose(warpedUv, uFrom, uFlipFrom);
-            vec4 cTo = samplePose(warpedUv, uTo, uFlipTo);
+            float maskFrom = 1.0;
+            float maskTo = 1.0;
+            vec4 cFrom = samplePose(warpedUv, uFrom, uFlipFrom, maskFrom);
+            vec4 cTo = samplePose(warpedUv, uTo, uFlipTo, maskTo);
             float eased = uMix * uMix * (3.0 - 2.0 * uMix);
             vec4 color = mix(cFrom, cTo, eased);
+            float poseMask = mix(maskFrom, maskTo, eased);
 
-            vec3 bgCol = vec3(0.0549, 0.0902, 0.1490);
-            float bgDist = distance(color.rgb, bgCol);
-            float alpha = smoothstep(0.07, 0.17, bgDist);
-            // Protect face & dark visor/sunglasses interior from chroma key
-            vec2 fc = (warpedUv - vec2(0.5, 0.50)) * vec2(1.18, 0.96);
-            alpha = max(alpha, smoothstep(0.32, 0.22, length(fc)));
-            color.rgb = mix(bgCol, color.rgb, clamp(alpha * 1.2, 0.0, 1.0));
-            float edge = smoothstep(0.50, 0.45, length(vUv - 0.5));
-            alpha *= edge;
+            float greenExcess = color.g - max(color.r, color.b);
+            float alpha = (1.0 - smoothstep(0.06, 0.24, greenExcess)) * poseMask;
+            float spill = max(0.0, color.g - max(color.r, color.b) * 1.04);
+            color.g -= spill;
             if (alpha <= 0.01) discard;
 
             gl_FragColor = vec4(color.rgb * alpha, alpha);
@@ -958,6 +979,8 @@ const orbitSkills = [
         uTexLoc = gl.getUniformLocation(prog, 'uTex');
         uGearTexLoc = gl.getUniformLocation(prog, 'uGearTex');
         uGearReadyLoc = gl.getUniformLocation(prog, 'uGearReady');
+        uAspect1Loc = gl.getUniformLocation(prog, 'uAspect1');
+        uAspect2Loc = gl.getUniformLocation(prog, 'uAspect2');
         uFromLoc = gl.getUniformLocation(prog, 'uFrom');
         uToLoc = gl.getUniformLocation(prog, 'uTo');
         uFlipFromLoc = gl.getUniformLocation(prog, 'uFlipFrom');
@@ -968,7 +991,7 @@ const orbitSkills = [
         gl.uniform1i(uTexLoc, 0);
         gl.uniform1i(uGearTexLoc, 1);
 
-        const spriteSrc = glCanvas.dataset.spriteSrc || '/portrait/spritesheet.jpg?v=2';
+        const spriteSrc = glCanvas.dataset.spriteSrc || '/portrait/spritesheet.jpg?v=3';
         const img = new Image();
         img.crossOrigin = 'anonymous';
         img.onload = () => {
@@ -981,6 +1004,9 @@ const orbitSkills = [
           gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
           gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
           gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, img);
+          if (img.naturalWidth && img.naturalHeight) {
+            cellAspect1 = (img.naturalWidth / 4) / (img.naturalHeight / 3);
+          }
           textureReady = true;
           fallbackImg?.classList.remove('is-visible');
         };
@@ -989,7 +1015,7 @@ const orbitSkills = [
         };
         img.src = spriteSrc;
 
-        const gearSrc = glCanvas.dataset.gearSrc || '/portrait/xr-gear.jpg?v=2';
+        const gearSrc = glCanvas.dataset.gearSrc || '/portrait/xr-gear.jpg?v=3';
         const gearImg = new Image();
         gearImg.crossOrigin = 'anonymous';
         gearImg.onload = () => {
@@ -1002,6 +1028,9 @@ const orbitSkills = [
           gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
           gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
           gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, gearImg);
+          if (gearImg.naturalWidth && gearImg.naturalHeight) {
+            cellAspect2 = (gearImg.naturalWidth / 3) / (gearImg.naturalHeight / 2);
+          }
           gearReady = true;
         };
         gearImg.src = gearSrc;
@@ -1174,6 +1203,8 @@ const orbitSkills = [
         gl.clearColor(0, 0, 0, 0);
         gl.clear(gl.COLOR_BUFFER_BIT);
         gl.uniform1f(uGearReadyLoc, gearReady ? 1 : 0);
+        gl.uniform1f(uAspect1Loc, cellAspect1);
+        gl.uniform1f(uAspect2Loc, cellAspect2);
         gl.uniform1f(uFromLoc, prevCell);
         gl.uniform1f(uToLoc, currentCell);
         gl.uniform1f(uFlipFromLoc, prevFlip);
